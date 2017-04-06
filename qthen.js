@@ -71,9 +71,10 @@ P.prototype._resolve = function _resolve( v ) {
         v = v();
     case 'object':
         // handle as thenable or fall through
-        if (_isThenable(v)) {
+        var then = _getThenMethod(v);
+        if (then) {
             var self = this;
-            v.then(function(v) { self._resolve(v) }, function(e) { self._reject(e) });
+            _tryThen(p, then, v, function(v) { self._resolve(v) }, function(e) { self._reject(e) });
             return this;
         }
     default:
@@ -117,9 +118,10 @@ P.prototype.then = function then( resolve, reject ) {
 function _thenResolve( p, v, resolve ) {
     if (resolve) {
         v = _tryFunc(p, resolve, v);
-        if (_isThenable(v)) {
+        var then = _getThenMethod(v);
+        if (then) {
             if (v === p) p._reject(new TypeError("cannot resolve from self"));
-            else v.then(function(v) { p._resolve(v) }, function(e) { p._reject(e) });
+            else _tryThen(p, then, v, function(v) { p._resolve(v) }, function(e) { p._reject(e) });
         }
         else p._resolve(v);
     }
@@ -130,9 +132,10 @@ function _thenResolve( p, v, resolve ) {
 function _thenReject( p, v, reject ) {
     if (reject) {
         v = _tryFunc(p, reject, v);
-        if (_isThenable(v)) {
+        var then = _getThenMethod(v);
+        if (then) {
             if (v === p) p._reject(new TypeError("cannot reject from self"));
-            else v.then(function(v) { p._resolve(v) }, function(e) { p._reject(e) });
+            else _tryThen(p, then, v, function(v) { p._resolve(v) }, function(e) { p._reject(e) });
         }
         else p._reject(v);
     }
@@ -143,6 +146,11 @@ function _thenReject( p, v, reject ) {
 function _tryFunc( p, fn, v ) {
     try { return fn(v) }
     catch (e) { p._reject(e) }
+}
+
+function _tryThen( p, then, x, a, b ) {
+    try { then.call(x, a, b) }
+    catch (err) { p._reject(e) }
 }
 
 // send the update / reject notifications to the listeners
@@ -195,8 +203,16 @@ function _isPromise( v ) {
 // Or: nonsense:  if `then` is a method, assume it will always resolve
 // to the same method.  The alternative is nonsense.
 // spec: p.then can throw?!
+// note: wrapping it in try/catch slows it 15% (8.2 -> 7.1 m/s)
+// note: inlining the try/catch slows it 80% (8.2 -> 4.5 m/s)
+function _tryIsThenable( p ) {
+    try { return _isThenable(p) } catch (e) { return false }
+}
 function _isThenable( p ) {
-    return p && typeof p.then === 'function';
+    var then;
+    return p && typeof (then = p.then) === 'function' ? then : false;
+
+    // return p && typeof p.then === 'function';
 
 /**
     try {
@@ -204,13 +220,21 @@ function _isThenable( p ) {
     } catch (e) {
         return false;
     }
-**/
+/**/
 
-// 12.5% slower... but yuck
+// 12.5% slower to not access `then` more than once...
 //    var then = p && p.then;
 //    return typeof then === 'function' ? function(a,b){ then.call(p, a, b) } : false;
 }
+function _getThenMethod( p ) {
+    return _tryIsThenable(p);
 
+    try {
+        var then = p.then;
+        return typeof then === 'function' ? then : false;
+    }
+    catch (e) { return false }
+}
 
 P.prototype = P.prototype;
 
