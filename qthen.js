@@ -71,9 +71,10 @@ P.prototype._resolve = function _resolve( v ) {
         v = v();
     case 'object':
         // handle as thenable or fall through
-        if (_tryIsThenable(v)) {
+        var then = _getThenMethod(v);
+        if (then) {
             var self = this;
-            _tryThen(p, v, function(v) { self._resolve(v) }, function(e) { self._reject(e) });
+            _callThenMethod(p, then, v, function(v) { self._resolve(v) }, function(e) { self._reject(e) });
             return this;
         }
     default:
@@ -117,9 +118,10 @@ P.prototype.then = function then( resolve, reject ) {
 function _thenResolve( p, v, resolve ) {
     if (resolve) {
         v = _tryFunc(p, resolve, v);
-        if (_tryIsThenable(v)) {
+        var then = _getThenMethod(v);
+        if (then) {
             if (v === p) p._reject(new TypeError("cannot resolve from self"));
-            else _tryThen(p, v, function(v) { p._resolve(v) }, function(e) { p._reject(e) });
+            else _callThenMethod(p, then, v, function(v) { p._resolve(v) }, function(e) { p._reject(e) });
         }
         else p._resolve(v);
     }
@@ -130,9 +132,10 @@ function _thenResolve( p, v, resolve ) {
 function _thenReject( p, v, reject ) {
     if (reject) {
         v = _tryFunc(p, reject, v);
-        if (_tryIsThenable(v)) {
+        var then = _getThenMethod(v);
+        if (then) {
             if (v === p) p._reject(new TypeError("cannot reject from self"));
-            else _tryThen(p, v, function(v) { p._resolve(v) }, function(e) { p._reject(e) });
+            else _callThenMethod(p, then, v, function(v) { p._resolve(v) }, function(e) { p._reject(e) });
         }
         else p._reject(v);
     }
@@ -150,7 +153,7 @@ function _tryThen( p, v, a, b ) {
     catch (e) { p._reject(e) }
 }
 
-function _tryMethod2( p, then, x, a, b ) {
+function _callThenMethod( p, then, x, a, b ) {
     try { then.call(x, a, b) }
     catch (err) { p._reject(err) }
 }
@@ -211,34 +214,13 @@ function _tryIsThenable( p ) {
     try { return _isThenable(p) } catch (e) { return false }
 }
 function _isThenable( p ) {
-    return p && typeof p.then === 'function';
-
     var then;
     return p && typeof (then = p.then) === 'function' ? then : false;
-
-    // return p && typeof p.then === 'function';
-
-/**
-    try {
-        return typeof p.then === 'function';
-    } catch (e) {
-        return false;
-    }
-/**/
-
-// 12.5% slower to not access `then` more than once...
-//    var then = p && p.then;
-//    return typeof then === 'function' ? function(a,b){ then.call(p, a, b) } : false;
 }
 function _getThenMethod( p ) {
     return _tryIsThenable(p);
-
-    try {
-        var then = p.then;
-        return typeof then === 'function' ? then : false;
-    }
-    catch (e) { return false }
 }
+
 
 P.prototype = P.prototype;
 
