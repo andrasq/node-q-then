@@ -71,10 +71,9 @@ P.prototype._resolve = function _resolve( v ) {
         v = v();
     case 'object':
         // handle as thenable or fall through
-        var then = _getThenMethod(v);
-        if (then) {
+        if (_tryIsThenable(v)) {
             var self = this;
-            _tryThen(p, then, v, function(v) { self._resolve(v) }, function(e) { self._reject(e) });
+            _tryThen(p, v, function(v) { self._resolve(v) }, function(e) { self._reject(e) });
             return this;
         }
     default:
@@ -88,7 +87,7 @@ P.prototype._resolve = function _resolve( v ) {
 P.prototype._reject = function _reject( e ) {
     if (!this.state) {
         this.state = 'n';
-        this.value = v;
+        this.value = e;
         _notify(this, this.no, e);
     }
     return this;
@@ -118,10 +117,9 @@ P.prototype.then = function then( resolve, reject ) {
 function _thenResolve( p, v, resolve ) {
     if (resolve) {
         v = _tryFunc(p, resolve, v);
-        var then = _getThenMethod(v);
-        if (then) {
+        if (_tryIsThenable(v)) {
             if (v === p) p._reject(new TypeError("cannot resolve from self"));
-            else _tryThen(p, then, v, function(v) { p._resolve(v) }, function(e) { p._reject(e) });
+            else _tryThen(p, v, function(v) { p._resolve(v) }, function(e) { p._reject(e) });
         }
         else p._resolve(v);
     }
@@ -132,10 +130,9 @@ function _thenResolve( p, v, resolve ) {
 function _thenReject( p, v, reject ) {
     if (reject) {
         v = _tryFunc(p, reject, v);
-        var then = _getThenMethod(v);
-        if (then) {
+        if (_tryIsThenable(v)) {
             if (v === p) p._reject(new TypeError("cannot reject from self"));
-            else _tryThen(p, then, v, function(v) { p._resolve(v) }, function(e) { p._reject(e) });
+            else _tryThen(p, v, function(v) { p._resolve(v) }, function(e) { p._reject(e) });
         }
         else p._reject(v);
     }
@@ -148,9 +145,14 @@ function _tryFunc( p, fn, v ) {
     catch (e) { p._reject(e) }
 }
 
-function _tryThen( p, then, x, a, b ) {
+function _tryThen( p, v, a, b ) {
+    try { v.then(a, b) }
+    catch (e) { p._reject(e) }
+}
+
+function _tryMethod2( p, then, x, a, b ) {
     try { then.call(x, a, b) }
-    catch (err) { p._reject(e) }
+    catch (err) { p._reject(err) }
 }
 
 // send the update / reject notifications to the listeners
@@ -209,6 +211,8 @@ function _tryIsThenable( p ) {
     try { return _isThenable(p) } catch (e) { return false }
 }
 function _isThenable( p ) {
+    return p && typeof p.then === 'function';
+
     var then;
     return p && typeof (then = p.then) === 'function' ? then : false;
 
