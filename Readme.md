@@ -101,6 +101,7 @@ Resources
 
 - [MDN Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) - javascript Promise writeup
 - [Promises/A+](https://promisesaplus.com/) - javascript promises interoperability spec
+- [Promises/A+ tests](https://github.com/promises-aplus/promises-tests)
 
 Related Work
 ============

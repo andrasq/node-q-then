@@ -158,9 +158,9 @@ qtimeit.bench({
     // node is 1m/s v6.7.0, 3-5m/s v8.x
     'node': function(cb) { typeof Promise != 'undefined' ? testLoop(Promise, cb) : cb() },
 
-    //'promise': function(cb) { testLoop(promis, cb) },
+    'promise': function(cb) { testLoop(promis, cb) },
 
-    //'rsvp': function(cb) { testLoop(RSVP, cb) },
+    'rsvp': function(cb) { testLoop(RSVP, cb) },
 
     // Bluebird is 2-3m/s
     'Bluebird': function(cb) { testLoop(Bluebird, cb) },
