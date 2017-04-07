@@ -39,7 +39,7 @@ qtimeit(1000000, function(){ x = new P(noop)._resolve(1) })
 // 25m/s minimal; 18m/s testing for thenable
 // 31m/s
 
-if (1) {
+if (0) {
 qtimeit(10000000, function(){ x = new P(noop) });
 // 40m/s
 qtimeit(1000000, function(){ x = P.resolve(1) });
@@ -133,7 +133,7 @@ qtimeit(10000, function(){ x = Promise
 }
 
 
-var nloops = 10000;
+var nloops = 100000;
 function testLoop( PP, cb ) {
     for (var i=0; i<nloops; i++) {
         PP.resolve('foo').then(function(s){ return PP.resolve(s + 'bar') }).then(function(s) { return PP.resolve(s + 'baz')})
@@ -149,10 +149,10 @@ function mikeTest( PP, cb ) {
     }
     if (cb) setImmediate(cb)
 }
-testLoop = mikeTest;
+//testLoop = mikeTest;
 
 qtimeit.bench.opsPerTest = nloops;
-qtimeit.bench.timeGoal = 2;
+qtimeit.bench.timeGoal = 5;
 //qtimeit.bench.visualize = true;
 qtimeit.bench({
     // node is 1m/s v6.7.0, 3-5m/s v8.x
@@ -165,8 +165,8 @@ qtimeit.bench({
     // Bluebird is 2-3m/s
     'Bluebird': function(cb) { testLoop(Bluebird, cb) },
 
-    // q-then is 2.5 - 10 m/s (20k nloops 2.5, 10k and 50k 10m/s)
-    'q-then': function(cb) { testLoop(P, cb) },
+    // q-promise is 2.5 - 10 m/s (20k nloops 2.5, 10k and 50k 10m/s)
+    'q-promise': function(cb) { testLoop(P, cb) },
 },
 function(){
     //x = P.resolve(3);

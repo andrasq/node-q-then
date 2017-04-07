@@ -1,13 +1,41 @@
 q-promise
 =========
 
-Experimental bare-bones Promise/A1+ compatible nodejs promises libray.
+Very fast bare-bones Promise/A+ compatible nodejs promises.
 
 Written as a an experiment to see how lean the implementation overhead could be
 made to be, with moderately good success; see the Benchmarks below.
 
-Functionality is minimal; this was not intended as a promises package, but
-as a promises engine.
+Functionality is minimal; the goal was not to be a full package, but
+to implement a fast promises engine.
+
+
+Benchmark
+=========
+
+Resolve the promise 100,000 times
+
+    Promise.resolve('foo')
+        .then(function(s){ return Promise.resolve(s + 'bar') })
+        .then(function(s) { return Promise.resolve(s + 'baz')});
+
+`$ node-v6.7.0 test/benchmark.js`
+
+    qtimeit=0.16.1 platform=linux kernel=3.16.0-4-amd64 cpuCount=8
+    node=6.7.0 v8=5.1.281.83 arch=ia32 mhz=4522 cpu="Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz" up_threshold=11
+    name  speed  (stats)  rate
+    node  101,806 ops/sec (1 runs of 4 calls in 3.929 out of 20.570 sec, +/- 0%) 1000
+    Bluebird  949,934 ops/sec (8 runs of 4 calls in 3.369 out of 6.993 sec, +/- 0%) 9331
+    q-promise  3,093,791 ops/sec (22 runs of 4 calls in 2.844 out of 5.606 sec, +/- 0%) 30389
+
+`$ node-v8.x test/benchmark.js`
+
+    qtimeit=0.16.1 platform=linux kernel=3.16.0-4-amd64 cpuCount=8
+    node=8.0.0-pre v8=5.7.492.69 arch=ia32 mhz=4521 cpu="Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz" up_threshold=11
+    name  speed  (stats)  rate
+    node  867,260 ops/sec (7 runs of 4 calls in 3.229 out of 6.946 sec, +/- 0%) 1000
+    Bluebird  611,552 ops/sec (5 runs of 4 calls in 3.270 out of 7.661 sec, +/- 0%) 705
+    q-promise  3,068,936 ops/sec (21 runs of 4 calls in 2.737 out of 5.838 sec, +/- 0%) 3539
 
 
 Api
