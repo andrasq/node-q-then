@@ -13,7 +13,7 @@ to implement a fast promises engine.
 Benchmark
 =========
 
-Resolve the promise 100,000 times
+Resolve the promise
 
     Promise.resolve('foo')
         .then(function(s){ return Promise.resolve(s + 'bar') })
