@@ -43,9 +43,10 @@ Api
 
 ## new P( executor(resolve, reject) )
 
-Create a promise with the `executor` function.  The `P` constructor passes the
-executor two callbacks, one to call if the promise is fulfilled, the other to call
-if it is rejected.
+Create a promise and call the `executor` function.  The executor will use the
+provided `resolve` or `reject` functions to settle (either fulfill with a value or
+reject with a reason) the created promise.  Use the `promise.then` method to add
+callbacks to the promise to be notified when the promise is settled.
 
 A newly constructed promise is in the "pending" state; it can transition into
 "fulfilled" with a value or "rejected" with a reason.  Once no longer pending the
