@@ -10,32 +10,38 @@ Functionality is minimal; the goal was not to be a full package, but
 to implement a fast promises engine.
 
 
-Benchmark
-=========
+Benchmarks
+==========
 
 Resolve the promise
 
-    Promise.resolve('foo')
-        .then(function(s){ return Promise.resolve(s + 'bar') })
-        .then(function(s) { return Promise.resolve(s + 'baz')});
+    function make(){
+        return new PP(function(resolve, reject) { resolve('foo') });
+    }
+    var x;
+    make().then(function(v){ return x = v });
 
-`$ node-v6.7.0 test/benchmark.js`
+$ node-v6.7.0 test/benchmark.js
 
     qtimeit=0.16.1 platform=linux kernel=3.16.0-4-amd64 cpuCount=8
-    node=6.7.0 v8=5.1.281.83 arch=ia32 mhz=4522 cpu="Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz" up_threshold=11
+    node=6.7.0 v8=5.1.281.83 arch=ia32 mhz=4521 cpu="Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz" up_threshold=11
     name  speed  (stats)  rate
-    node  101,806 ops/sec (1 runs of 4 calls in 3.929 out of 20.570 sec, +/- 0%) 1000
-    Bluebird  949,934 ops/sec (8 runs of 4 calls in 3.369 out of 6.993 sec, +/- 0%) 9331
-    q-promise  3,093,791 ops/sec (22 runs of 4 calls in 2.844 out of 5.606 sec, +/- 0%) 30389
+    node         443,171 ops/sec (15 runs of 4 calls in 13.539 out of 24.552 sec, +/- 0%)   1000
+    promise    1,318,680 ops/sec (41 runs of 4 calls in 12.437 out of 21.690 sec, +/- 0%)   2976
+    rsvp       1,047,040 ops/sec (33 runs of 4 calls in 12.607 out of 21.685 sec, +/- 0%)   2363
+    Bluebird   1,913,504 ops/sec (55 runs of 4 calls in 11.497 out of 21.033 sec, +/- 0%)   4318
+    q-promise  9,104,758 ops/sec (66 runs of 20 calls in 14.498 out of 20.576 sec, +/- 0%) 20545
 
-`$ node-v8.x test/benchmark.js`
+$ node-v8.x test/benchmark.js
 
     qtimeit=0.16.1 platform=linux kernel=3.16.0-4-amd64 cpuCount=8
     node=8.0.0-pre v8=5.7.492.69 arch=ia32 mhz=4521 cpu="Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz" up_threshold=11
     name  speed  (stats)  rate
-    node  867,260 ops/sec (7 runs of 4 calls in 3.229 out of 6.946 sec, +/- 0%) 1000
-    Bluebird  611,552 ops/sec (5 runs of 4 calls in 3.270 out of 7.661 sec, +/- 0%) 705
-    q-promise  3,068,936 ops/sec (21 runs of 4 calls in 2.737 out of 5.838 sec, +/- 0%) 3539
+    node       2,224,721 ops/sec (64 runs of 4 calls in 11.507 out of 20.969 sec, +/- 0%)   1000
+    promise    1,485,252 ops/sec (42 runs of 4 calls in 11.311 out of 21.360 sec, +/- 0%)    668
+    rsvp         981,993 ops/sec (32 runs of 4 calls in 13.035 out of 21.967 sec, +/- 0%)    441
+    Bluebird   1,347,072 ops/sec (40 runs of 4 calls in 11.878 out of 21.467 sec, +/- 0%)    606
+    q-promise  7,814,585 ops/sec (59 runs of 20 calls in 15.100 out of 20.751 sec, +/- 0%)  3513
 
 
 Api

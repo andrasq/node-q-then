@@ -139,6 +139,8 @@ function testLoop( PP, cb ) {
         PP.resolve('foo').then(function(s){ return PP.resolve(s + 'bar') }).then(function(s) { return PP.resolve(s + 'baz')})
     }
     setImmediate(cb)
+    //process.nextTick(cb)
+    //cb()
 }
 function mikeTest( PP, cb ) {
     function make() {
@@ -149,10 +151,10 @@ function mikeTest( PP, cb ) {
     }
     if (cb) setImmediate(cb)
 }
-//testLoop = mikeTest;
+testLoop = mikeTest;
 
 qtimeit.bench.opsPerTest = nloops;
-qtimeit.bench.timeGoal = 5;
+qtimeit.bench.timeGoal = 2;
 //qtimeit.bench.visualize = true;
 qtimeit.bench({
     // node is 1m/s v6.7.0, 3-5m/s v8.x
