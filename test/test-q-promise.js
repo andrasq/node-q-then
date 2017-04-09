@@ -117,6 +117,145 @@ describe ('q-promise', function(){
     })
 
     describe ('then', function(){
+        it ('should return a new promise', function(done) {
+            var p2 = p.then();
+            qassert.equal(p2.constructor, p.constructor);
+            done();
+        })
+
+        it ('should reject if resolve throws', function(done) {
+            var err = new Error("resolve error");
+            var p2 = p.then(function(v) { throw err });
+            p._resolve(1);
+            setImmediate(function(){
+                qassert.equal(p2.state, 'n');
+                qassert.equal(p2.value, err);
+                done();
+            })
+        })
+
+        it ('should reject if reject throws', function(done) {
+            var err = new Error("reject error");
+            var p2 = p.then(null, function(e) { throw err });
+            p._reject(1);
+            setImmediate(function(){
+                qassert.equal(p2.state, 'n');
+                qassert.contains(p2.value, err);
+                done();
+            })
+        })
+
+        it ('should call resolve without this from system stack', function(done) {
+            (function localStackMarker() {
+                var called;
+                var p2 = p.then(function(v) {
+                    qassert.equal(v, 1234);
+                    qassert.equal(this, null);
+                    qassert.ok(new Error().stack.indexOf('localStackMarker') < 0);
+                    done();
+                })
+                p._resolve(1234);
+            })();
+        })
+
+        it ('should call reject without this from system stack', function(done) {
+            (function localStackMarker() {
+                var called;
+                var p2 = p.then(null, function(v) {
+                    qassert.equal(v, 1234);
+                    qassert.equal(this, null);
+                    qassert.ok(new Error().stack.indexOf('localStackMarker') < 0);
+                    done();
+                })
+                p._reject(1234);
+            })();
+        })
+
+        it ('should notify with fulfilled value', function(done) {
+            var called;
+            p.then(function(v) { called = v });
+            p._resolve(123);
+            setImmediate(function() {
+                qassert.equal(called, 123);
+                done();
+            })
+        })
+
+        it ('should notify with rejected cause', function(done) {
+            var called;
+            p.then(null, function(e) { called = e });
+            p._reject(123);
+            setImmediate(function() {
+                qassert.equal(called, 123);
+                done();
+            })
+        })
+
+        it ('should resolve with value if no then resolve function', function(done) {
+            // test with one listener to check single-listener handling; two below
+            var p2 = p.then(null, function(e){});
+            p._resolve(123);
+            setImmediate(function() {
+                qassert.equal(p2.state, 'y');
+                qassert.equal(p2.value, 123);
+                done();
+            })
+        })
+
+        it ('should reject with value if no then reject function', function(done) {
+            // test with two listeners to check multi-listener handling; one above
+            var p2 = p.then(function(e){}, 2);
+            var p3 = p.then(function(e){}, 2);
+            p._reject(123);
+            setImmediate(function() {
+                qassert.equal(p2.state, 'n');
+                qassert.equal(p2.value, 123);
+                qassert.equal(p3.state, 'n');
+                qassert.equal(p3.value, 123);
+                done();
+            })
+        })
+
+        it ('should notify multiple resolves, in order', function(done) {
+            var calls = [];
+            var p2 = p.then(function(v){ v = 1; calls.push(v); return v });
+            var p3 = p.then(function(v){ v = 2; calls.push(v); return v });
+            var p4 = p.then(function(v){ v = 3; calls.push(v); return v });
+            p._resolve(123);
+            setImmediate(function(){
+                qassert.deepEqual(calls, [1, 2, 3]);
+                qassert.equal(p2.state, 'y');
+                qassert.equal(p2.value, 1);
+                qassert.equal(p3.state, 'y');
+                qassert.equal(p3.value, 2);
+                qassert.equal(p4.state, 'y');
+                qassert.equal(p4.value, 3);
+                done();
+            });
+        })
+
+        it ('should notify multiple rejects, in order', function(done) {
+            var calls = [];
+            var p2 = p.then(null, function(v){ v = 1; calls.push(v); return v });
+            var p3 = p.then(null, function(v){ v = 2; calls.push(v); return v });
+            var p4 = p.then(null, function(v){ v = 3; calls.push(v); return v });
+            var p5 = p.then();
+            p._reject(123);
+            setImmediate(function(){
+                qassert.deepEqual(calls, [1, 2, 3]);
+                // if then-reject() returns a value, settle the promise with it
+                qassert.equal(p2.state, 'y');
+                qassert.equal(p2.value, 1);
+                qassert.equal(p3.state, 'y');
+                qassert.equal(p3.value, 2);
+                qassert.equal(p4.state, 'y');
+                qassert.equal(p4.value, 3);
+                // if no then-reject function, reject the promise with p1.value
+                qassert.equal(p5.state, 'n');
+                qassert.equal(p5.value, 123);
+                done();
+            });
+        })
     })
 
     describe ('catch', function(){
@@ -131,6 +270,36 @@ describe ('q-promise', function(){
     })
 
     describe ('__resolve', function(){
+        it ('should not resolve a fulfilled promise', function(done) {
+            p._resolve(1);
+            p._resolve(2);
+            qassert.equal(p.value, 1);
+            done();
+        })
+
+        it ('should not resolve a rejected promise', function(done) {
+            p._reject(1);
+            p._reject(2);
+            qassert.equal(p.value, 1);
+            done();
+        })
+
+        it ('should reject if a thenable function throws', function(done) {
+            var err = new Error('die');
+            var err2 = new Error('die2');
+            var p2 = p.then(function(){ throw err });
+            // chain p3 to p2, when p2 rejects p3 will also
+            var p3 = p2.then(null, function(){ throw err2 });
+            p._resolve(1);
+            setImmediate(function() {
+                qassert.equal(p2.state, 'n');
+                qassert.equal(p2.value, err);
+                qassert.equal(p3.state, 'n');
+                qassert.equal(p3.value, err2);
+                done();
+            })
+        })
+
         it ('should resolve a value', function(done) {
             done();
         })
