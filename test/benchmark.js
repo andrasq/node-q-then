@@ -33,9 +33,9 @@ qtimeit(10000000, function(){ x = new P(noop) });
 // 28m/s inside try/catch, 21m/s if wrapped in an additional function
 // 36m/s if resolver is run in a separate func
 
-qtimeit(1000000, function(){ x = new P()._resolve(1) })
+qtimeit(1000000, function(){ x = new P().then(1) })
 // 59m/s
-qtimeit(1000000, function(){ x = new P(noop)._resolve(1) })
+qtimeit(1000000, function(){ x = new P(noop).then(1) })
 // 25m/s minimal; 18m/s testing for thenable
 // 31m/s
 
@@ -133,10 +133,16 @@ qtimeit(10000, function(){ x = Promise
 }
 
 
-var nloops = 100000;
+var nloops = 2000;
+var ncalls = 0;
+qtimeit.bench.opsPerTest = nloops;
+qtimeit.bench.timeGoal = 2;
+qtimeit.bench.visualize = true;
+
 function testLoop( PP, cb ) {
     for (var i=0; i<nloops; i++) {
-        PP.resolve('foo').then(function(s){ return PP.resolve(s + 'bar') }).then(function(s) { return PP.resolve(s + 'baz')})
+        x = PP.resolve('foo').then(function(s){ ncalls++; return PP.resolve(s + 'bar') }).then(function(s) { return PP.resolve(s + 'baz')})
+        //x = PP.resolve('foo').then(function(s){ return 1234 });
     }
     setImmediate(cb)
     //process.nextTick(cb)
@@ -144,7 +150,8 @@ function testLoop( PP, cb ) {
 }
 function mikeTest( PP, cb ) {
     function make() {
-        return new PP(function(resolve, reject) { resolve('foo') })
+        return new PP(function(resolve, reject) { ncalls++; resolve('foo') });
+        //return new PP(function(resolve, reject) { setTimeout(function(){ ncalls++; resolve('foo') }, 1) });
     }
     for (var i=0; i<nloops; i++) {
         make().then(function(v){ return x = v; })
@@ -153,9 +160,6 @@ function mikeTest( PP, cb ) {
 }
 testLoop = mikeTest;
 
-qtimeit.bench.opsPerTest = nloops;
-qtimeit.bench.timeGoal = 2;
-//qtimeit.bench.visualize = true;
 qtimeit.bench({
     // node is 1m/s v6.7.0, 3-5m/s v8.x
     'node': function(cb) { typeof Promise != 'undefined' ? testLoop(Promise, cb) : cb() },
@@ -172,7 +176,10 @@ qtimeit.bench({
 },
 function(){
     //x = P.resolve(3);
-    console.log(x);
+    setTimeout(function(){ 
+        // q-promise resolves on the next event loop, wait for it
+        console.log("AR: %d calls total, got", ncalls, x);
+    }, 1);
     console.log(process.memoryUsage());
 
 })
