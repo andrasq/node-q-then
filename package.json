@@ -1,6 +1,6 @@
 {
   "name": "q-promise",
-  "version": "0.1.1",
+  "version": "0.2.1",
   "main": "index.js",
   "description": "very fast nodejs promises engine",
   "license": "Apache-2.0",
@@ -8,5 +8,10 @@
     "url": "git://github.com/andrasq/node-q-promise",
     "type": "git"
   },
-  "keywords": [ "fast", "promise", "Andras", "async" ]
+  "keywords": [ "fast", "promise", "Andras", "async" ],
+  "scripts": {
+    "coverage": "nyc --version && nyc --reporter lcov --reporter text qnit test/test* || echo nyc not installed",
+    "clean": "rm -rf .nyc_output coverage npm-debug.log",
+    "test": "qnit --version && qnit test/test* || echo qnit not installed, cannot test"
+  }
 }
