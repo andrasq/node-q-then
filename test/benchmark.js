@@ -161,17 +161,15 @@ function mikeTest( PP, cb ) {
 testLoop = mikeTest;
 
 qtimeit.bench({
-    // node is 1m/s v6.7.0, 3-5m/s v8.x
+
     'node': function(cb) { typeof Promise != 'undefined' ? testLoop(Promise, cb) : cb() },
 
     'promise': function(cb) { testLoop(promis, cb) },
 
     'rsvp': function(cb) { testLoop(RSVP, cb) },
 
-    // Bluebird is 2-3m/s
     'Bluebird': function(cb) { testLoop(Bluebird, cb) },
 
-    // q-promise is 2.5 - 10 m/s (20k nloops 2.5, 10k and 50k 10m/s)
     'q-promise': function(cb) { testLoop(P, cb) },
 },
 function(){
