@@ -123,6 +123,52 @@ describe ('q-promise', function(){
             done();
         })
 
+        it ('should settle with resolved value', function(done) {
+            p._resolve(123);
+            var p2 = p.then();
+            qassert.equal(p2.value, 123);
+            qassert.equal(p2.state, 'y');
+            done();
+        })
+
+        it ('should settle with rejected cause', function(done) {
+            p._reject(123);
+            var p2 = p.then();
+            qassert.equal(p2.value, 123);
+            qassert.equal(p2.state, 'n');
+            done();
+        })
+
+        it ('should report value to then-resolve', function(done) {
+            p._resolve(123);
+            var p2 = p.then(resolve, reject);
+            function resolve(v) {
+                setImmediate(function(){
+                    qassert.equal(v, 123);
+                    qassert.equal(p2.state, 'y');
+                    done();
+                })
+            }
+            function reject(e) {
+                qassert.fail();
+            }
+        })
+
+        it ('should report cause to then-reject', function(done) {
+            p._reject(123);
+            var p2 = p.then(resolve, reject);
+            function resolve(v) {
+                qassert.fail();
+            }
+            function reject(e) {
+                setImmediate(function(){
+                    qassert.equal(p2.state, 'n');
+                    qassert.equal(p2.value, 123);
+                    done();
+                })
+            }
+        })
+
         it ('should reject if resolve throws', function(done) {
             var err = new Error("resolve error");
             var p2 = p.then(function(v) { throw err });
@@ -345,11 +391,35 @@ describe ('q-promise', function(){
             }, done);
         })
 
-        it ('should resolve pending promises', function(done) {
+        it ('should resolve pending promises that are fulfilled by resolve', function(done) {
             var ds = [];
             for (var i=0; i<dataset.length; i++) ds[i] = (function(v){
                 return new P(function(resolve, reject) {
                     setTimeout(resolve, 5, v);
+                })
+            })(dataset[i]);
+            testDataset(ds, function(p, i) {
+                qassert.ok(!ds[i].state);
+                qassert.ok(!p.state);
+            },
+            function(err) {
+                if (err) return done(err);
+                setTimeout(function() {
+                    testDataset(ds, function(p, i) {
+                        qassert.equal(ds[i].state, 'y');
+                        qassert.equal(ds[i].value, dataset[i]);
+                        qassert.equal(p.state, 'y');
+                        qassert.equal(p.value, ds[i].value);
+                    }, done);
+                }, 10);
+            });
+        })
+
+        it ('should resolve pending promises that are eventually rejected', function(done) {
+            var ds = [];
+            for (var i=0; i<dataset.length; i++) ds[i] = (function(v){
+                return new P(function(resolve, reject) {
+                    setTimeout(reject, 5, P.resolve(v));
                 })
             })(dataset[i]);
             testDataset(ds, function(p, i) {

@@ -175,7 +175,7 @@ qtimeit.bench({
 function(){
     //x = P.resolve(3);
     setTimeout(function(){ 
-        // q-promise resolves on the next event loop, wait for it
+        // q-promise resolves on the next event loop tick, wait for it
         console.log("AR: %d calls total, got", ncalls, x);
     }, 1);
     console.log(process.memoryUsage());
