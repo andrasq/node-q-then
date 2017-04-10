@@ -139,16 +139,24 @@ qtimeit.bench.opsPerTest = nloops;
 qtimeit.bench.timeGoal = 2;
 qtimeit.bench.visualize = true;
 
+function waitForEnd( wantCount, cb ) {
+    process.nextTick(function testEnd() {
+        if (ncalls >= wantCount) cb();
+        // 100% busy wait for promises to be resolved
+        else setImmediate(testEnd);
+    })
+}
+
 function testLoop( PP, cb ) {
+    var callsAtStart = ncalls;
     for (var i=0; i<nloops; i++) {
         x = PP.resolve('foo').then(function(s){ ncalls++; return PP.resolve(s + 'bar') }).then(function(s) { return PP.resolve(s + 'baz')})
         //x = PP.resolve('foo').then(function(s){ return 1234 });
     }
-    setImmediate(cb)
-    //process.nextTick(cb)
-    //cb()
+    if (cb) waitForEnd(callsAtStart + nloops, cb);
 }
 function mikeTest( PP, cb ) {
+    var callsAtStart = ncalls;
     function make() {
         return new PP(function(resolve, reject) { ncalls++; resolve('foo') });
         //return new PP(function(resolve, reject) { setTimeout(function(){ ncalls++; resolve('foo') }, 1) });
@@ -156,7 +164,7 @@ function mikeTest( PP, cb ) {
     for (var i=0; i<nloops; i++) {
         make().then(function(v){ return x = v; })
     }
-    if (cb) setImmediate(cb)
+    if (cb) waitForEnd(callsAtStart + nloops, cb);
 }
 testLoop = mikeTest;
 
