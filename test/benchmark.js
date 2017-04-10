@@ -150,19 +150,23 @@ function waitForEnd( wantCount, cb ) {
 function testLoop( PP, cb ) {
     var callsAtStart = ncalls;
     for (var i=0; i<nloops; i++) {
-        x = PP.resolve('foo').then(function(s){ ncalls++; return PP.resolve(s + 'bar') }).then(function(s) { return PP.resolve(s + 'baz')})
-        //x = PP.resolve('foo').then(function(s){ return 1234 });
+        x = PP.resolve('foo').then(function(s){ ncalls++; return PP.resolve(s + 'bar') }).then(function(s) { ncalls++; return PP.resolve(s + 'baz')})
+        //x = PP.resolve('foo').then(function(s){ ncalls++; return 1234 });
     }
     if (cb) waitForEnd(callsAtStart + nloops, cb);
 }
 function mikeTest( PP, cb ) {
     var callsAtStart = ncalls;
     function make() {
-        return new PP(function(resolve, reject) { ncalls++; resolve('foo') });
-        //return new PP(function(resolve, reject) { setTimeout(function(){ ncalls++; resolve('foo') }, 1) });
+        //return new PP(function(resolve, reject) { ncalls++; resolve('foo') });
+        return new PP(function(resolve, reject) { resolve('foo') });
+        //return new PP(function(resolve, reject) { setTimeout(function(){ resolve('foo') }, 1) });
     }
     for (var i=0; i<nloops; i++) {
-        make().then(function(v){ return x = v; })
+// NOTE: node and bluebird are 2x faster if ncalls is incremented next to x=v. (4m/s) (v8; v6.7 2k)
+// NOTE: bluebird is 50% faster if ncalls is incremented next to resolve('foo') (v6.7 2k, bluebird only 20k)
+        //make().then(function(v){ return x = v; })
+        make().then(function(v){ ncalls++; return x = v; })
     }
     if (cb) waitForEnd(callsAtStart + nloops, cb);
 }
