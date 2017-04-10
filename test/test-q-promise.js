@@ -270,6 +270,35 @@ describe ('q-promise', function(){
     })
 
     describe ('__resolve', function(){
+        var dataset = [
+            0,
+            false,
+            null,
+            undefined,
+            123,
+            "foo",
+            new Date("2001-01-01T00:00:00.000Z"),
+            /foobar/i,
+            {a:1},
+            [1,3,5],
+            {test:1},
+        ];
+
+        function testDataset( dataset, verifyCb, done ) {
+            var i = 0, v;
+            forEachParallel(
+                dataset,
+                function(v, i, next) {
+                    var p = P.resolve(v);
+                    setImmediate(function() {
+                        verifyCb(p, i);
+                        next();
+                    });
+                },
+                done
+            );
+        }
+
         it ('should not resolve a fulfilled promise', function(done) {
             p._resolve(1);
             p._resolve(2);
@@ -300,15 +329,55 @@ describe ('q-promise', function(){
             })
         })
 
-        it ('should resolve a value', function(done) {
+        it ('should resolve values', function(done) {
+            testDataset(dataset, function(p, i) {
+                qassert.equal(p.state, 'y');
+                qassert.equal(p.value, dataset[i]);
+            }, done);
+        })
+
+        it ('should resolve settled promises', function(done) {
+            var ds = [];
+            for (var i=0; i<dataset.length; i++) ds[i] = P.resolve(dataset[i]);
+            testDataset(ds, function(p, i) {
+                qassert.equal(p.state, 'y');
+                qassert.equal(p.value, ds[i].value);
+            }, done);
+        })
+
+        it ('should resolve pending promises', function(done) {
+            var ds = [];
+            for (var i=0; i<dataset.length; i++) ds[i] = (function(v){
+                return new P(function(resolve, reject) {
+                    setTimeout(resolve, 5, v);
+                })
+            })(dataset[i]);
+            testDataset(ds, function(p, i) {
+                qassert.ok(!ds[i].state);
+                qassert.ok(!p.state);
+            },
+            function(err) {
+                if (err) return done(err);
+                setTimeout(function() {
+                    testDataset(ds, function(p, i) {
+                        qassert.equal(ds[i].state, 'y');
+                        qassert.equal(ds[i].value, dataset[i]);
+                        qassert.equal(p.state, 'y');
+                        qassert.equal(p.value, ds[i].value);
+                    }, done);
+                }, 10);
+            });
+        })
+
+        it ('should resolve a thenable', function(done) {
             done();
         })
 
-        it ('should resolve an object', function(done) {
+        it ('should resolve a value returned by a then resolve', function(done) {
             done();
         })
 
-        it ('should resolve a promise', function(done) {
+        it ('should resolve a thenable returned by a then resolve', function(done) {
             done();
         })
     })
@@ -341,4 +410,32 @@ function testResolvesDataset( tester, cb ) {
         
     }
     if (cb) cb();
+}
+
+function repeatWhile( test, loop, cb ) {
+    if (!test()) return cb();
+
+    loop(function(err) {
+        if (err) return cb(err);
+        setImmediate(function(){
+            repeatWhile(test, loop, cb)
+        });
+    });
+}
+
+function forEachParallel( list, visitor, cb ) {
+    var ndone = 0;
+    var finished = false;
+
+    for (var i=0; i<list.length; i++) doVisit(list[i], i);
+
+    function doVisit(v, i) {
+        visitor(v, i, function(err) {
+            ndone += 1;
+            if ((err || ndone === list.length) && !finished) {
+                finished = true;
+                cb(err);
+            }
+        });
+    }
 }
