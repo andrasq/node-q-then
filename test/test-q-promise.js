@@ -2,6 +2,9 @@
 
 var qassert = require('qassert');
 var P = require('../');
+var _PENDING = P._PENDING;
+var _RESOLVED = P._RESOLVED;
+var _REJECTED = P._REJECTED;
 
 describe ('q-promise', function(){
 
@@ -44,7 +47,7 @@ describe ('q-promise', function(){
 
         it ('should reject if executor throws', function(done) {
             var p = new P(function(resolve) { throw new Error("executor error") }); 
-            qassert.equal(p.state, 'n', "wanted rejected");
+            qassert.equal(p.state, _REJECTED, "wanted rejected");
             done();
         })
 
@@ -52,7 +55,7 @@ describe ('q-promise', function(){
             var called;
             P.onResolve(function(v, p, s) { called = [v, p, s] })
             var p = new P(function(resolve, reject) { resolve(123) });
-            qassert.deepEqual(called, [123, p, 'y']);
+            qassert.deepEqual(called, [123, p, _RESOLVED]);
             done();
         })
 
@@ -60,7 +63,7 @@ describe ('q-promise', function(){
             var called;
             P.onResolve(function(v, p, s) { called = [v, p, s] })
             var p = new P(function(resolve, reject) { reject(123) });
-            qassert.deepEqual(called, [123, p, 'n']);
+            qassert.deepEqual(called, [123, p, _REJECTED]);
             done();
         })
     })
@@ -69,14 +72,14 @@ describe ('q-promise', function(){
         it ('should return a fulfilled promise', function(done) {
             var p = P.resolve(123);
             qassert(p instanceof P);
-            qassert.equal(p.state, 'y');
+            qassert.equal(p.state, _RESOLVED);
             qassert.equal(p.value, 123);
             done();
         })
 
         it ('should resolve with function return value', function(done) {
             var p = P.resolve(function(){ return 123 });
-            qassert.equal(p.state, 'y');
+            qassert.equal(p.state, _RESOLVED);
             qassert.equal(p.value, 123);
             done();
         })
@@ -84,7 +87,7 @@ describe ('q-promise', function(){
         it ('should reject if function throws', function(done) {
             var err = new Error("die");
             var p = P.resolve(function(){ throw err });
-            qassert.equal(p.state, 'n');
+            qassert.equal(p.state, _REJECTED);
             qassert.equal(p.value, err);
             done();
         })
@@ -93,7 +96,7 @@ describe ('q-promise', function(){
             var called;
             P.onResolve(function(v, p, s){ called = [v, p, s] });
             var p = P.resolve(1);
-            qassert.deepEqual(called, [1, p, 'y']);
+            qassert.deepEqual(called, [1, p, _RESOLVED]);
             done();
         })
 
@@ -101,7 +104,7 @@ describe ('q-promise', function(){
             var called;
             P.onResolve(function(v, p, s){ called = [v, p, s] });
             var p = P.resolve(function(){ return 123 });
-            qassert.deepEqual(called, [123, p, 'y']);
+            qassert.deepEqual(called, [123, p, _RESOLVED]);
             done();
         })
     })
@@ -110,14 +113,14 @@ describe ('q-promise', function(){
         it ('should return a rejected promise', function(done) {
             var p = P.reject(123);
             qassert(p instanceof P);
-            qassert.equal(p.state, 'n');
+            qassert.equal(p.state, _REJECTED);
             qassert.equal(p.value, 123);
             done();
         })
 
         it ('should reject with function return value', function(done) {
             var p = P.reject(function(){ return 123 });
-            qassert.equal(p.state, 'n');
+            qassert.equal(p.state, _REJECTED);
             qassert.equal(p.value, 123);
             done();
         })
@@ -125,7 +128,7 @@ describe ('q-promise', function(){
         it ('should reject if function throws', function(done) {
             var err = new Error("die2");
             var p = P.reject(function(){ throw err });
-            qassert.equal(p.state, 'n');
+            qassert.equal(p.state, _REJECTED);
             qassert.equal(p.value, err);
             done();
         })
@@ -134,14 +137,14 @@ describe ('q-promise', function(){
             var called;
             P.onResolve(function(v, p, s){ called = [v, p, s] });
             var p = P.reject(123);
-            qassert.deepEqual(called, [123, p, 'n']);
+            qassert.deepEqual(called, [123, p, _REJECTED]);
             done();
         })
         it ('should call __resolve on a function result', function(done) {
             var called;
             P.onResolve(function(v, p, s){ called = [v, p, s] });
             var p = P.reject(function(){ return 123 });
-            qassert.deepEqual(called, [123, p, 'n']);
+            qassert.deepEqual(called, [123, p, _REJECTED]);
             done();
         })
     })
@@ -157,7 +160,7 @@ describe ('q-promise', function(){
             p._resolve(123);
             var p2 = p.then();
             qassert.equal(p2.value, 123);
-            qassert.equal(p2.state, 'y');
+            qassert.equal(p2.state, _RESOLVED);
             done();
         })
 
@@ -165,7 +168,7 @@ describe ('q-promise', function(){
             p._reject(123);
             var p2 = p.then();
             qassert.equal(p2.value, 123);
-            qassert.equal(p2.state, 'n');
+            qassert.equal(p2.state, _REJECTED);
             done();
         })
 
@@ -175,7 +178,7 @@ describe ('q-promise', function(){
             function resolve(v) {
                 setImmediate(function(){
                     qassert.equal(v, 123);
-                    qassert.equal(p2.state, 'y');
+                    qassert.equal(p2.state, _RESOLVED);
                     done();
                 })
             }
@@ -192,7 +195,7 @@ describe ('q-promise', function(){
             }
             function reject(e) {
                 setImmediate(function(){
-                    qassert.equal(p2.state, 'n');
+                    qassert.equal(p2.state, _REJECTED);
                     qassert.equal(p2.value, 123);
                     done();
                 })
@@ -204,7 +207,7 @@ describe ('q-promise', function(){
             var p2 = p.then(function(v) { throw err });
             p._resolve(1);
             setImmediate(function(){
-                qassert.equal(p2.state, 'n');
+                qassert.equal(p2.state, _REJECTED);
                 qassert.equal(p2.value, err);
                 done();
             })
@@ -215,7 +218,7 @@ describe ('q-promise', function(){
             var p2 = p.then(null, function(e) { throw err });
             p._reject(1);
             setImmediate(function(){
-                qassert.equal(p2.state, 'n');
+                qassert.equal(p2.state, _REJECTED);
                 qassert.contains(p2.value, err);
                 done();
             })
@@ -272,7 +275,7 @@ describe ('q-promise', function(){
             var p2 = p.then(null, function(e){});
             p._resolve(123);
             setImmediate(function() {
-                qassert.equal(p2.state, 'y');
+                qassert.equal(p2.state, _RESOLVED);
                 qassert.equal(p2.value, 123);
                 done();
             })
@@ -284,9 +287,9 @@ describe ('q-promise', function(){
             var p3 = p.then(function(e){}, 2);
             p._reject(123);
             setImmediate(function() {
-                qassert.equal(p2.state, 'n');
+                qassert.equal(p2.state, _REJECTED);
                 qassert.equal(p2.value, 123);
-                qassert.equal(p3.state, 'n');
+                qassert.equal(p3.state, _REJECTED);
                 qassert.equal(p3.value, 123);
                 done();
             })
@@ -300,11 +303,11 @@ describe ('q-promise', function(){
             p._resolve(123);
             setImmediate(function(){
                 qassert.deepEqual(calls, [1, 2, 3]);
-                qassert.equal(p2.state, 'y');
+                qassert.equal(p2.state, _RESOLVED);
                 qassert.equal(p2.value, 1);
-                qassert.equal(p3.state, 'y');
+                qassert.equal(p3.state, _RESOLVED);
                 qassert.equal(p3.value, 2);
-                qassert.equal(p4.state, 'y');
+                qassert.equal(p4.state, _RESOLVED);
                 qassert.equal(p4.value, 3);
                 done();
             });
@@ -320,14 +323,14 @@ describe ('q-promise', function(){
             setImmediate(function(){
                 qassert.deepEqual(calls, [1, 2, 3]);
                 // if then-reject() returns a value, settle the promise with it
-                qassert.equal(p2.state, 'y');
+                qassert.equal(p2.state, _RESOLVED);
                 qassert.equal(p2.value, 1);
-                qassert.equal(p3.state, 'y');
+                qassert.equal(p3.state, _RESOLVED);
                 qassert.equal(p3.value, 2);
-                qassert.equal(p4.state, 'y');
+                qassert.equal(p4.state, _RESOLVED);
                 qassert.equal(p4.value, 3);
                 // if no then-reject function, reject the promise with p1.value
-                qassert.equal(p5.state, 'n');
+                qassert.equal(p5.state, _REJECTED);
                 qassert.equal(p5.value, 123);
                 done();
             });
@@ -397,9 +400,9 @@ describe ('q-promise', function(){
             var p3 = p2.then(null, function(){ throw err2 });
             p._resolve(1);
             setImmediate(function() {
-                qassert.equal(p2.state, 'n');
+                qassert.equal(p2.state, _REJECTED);
                 qassert.equal(p2.value, err);
-                qassert.equal(p3.state, 'n');
+                qassert.equal(p3.state, _REJECTED);
                 qassert.equal(p3.value, err2);
                 done();
             })
@@ -407,7 +410,7 @@ describe ('q-promise', function(){
 
         it ('should resolve values', function(done) {
             testDataset(dataset, function(p, i) {
-                qassert.equal(p.state, 'y');
+                qassert.equal(p.state, _RESOLVED);
                 qassert.equal(p.value, dataset[i]);
             }, done);
         })
@@ -416,7 +419,7 @@ describe ('q-promise', function(){
             var ds = [];
             for (var i=0; i<dataset.length; i++) ds[i] = P.resolve(dataset[i]);
             testDataset(ds, function(p, i) {
-                qassert.equal(p.state, 'y');
+                qassert.equal(p.state, _RESOLVED);
                 qassert.equal(p.value, ds[i].value);
             }, done);
         })
@@ -436,9 +439,9 @@ describe ('q-promise', function(){
                 if (err) return done(err);
                 setTimeout(function() {
                     testDataset(ds, function(p, i) {
-                        qassert.equal(ds[i].state, 'y');
+                        qassert.equal(ds[i].state, _RESOLVED);
                         qassert.equal(ds[i].value, dataset[i]);
-                        qassert.equal(p.state, 'y');
+                        qassert.equal(p.state, _RESOLVED);
                         qassert.equal(p.value, ds[i].value);
                     }, done);
                 }, 10);
@@ -460,9 +463,9 @@ describe ('q-promise', function(){
                 if (err) return done(err);
                 setTimeout(function() {
                     testDataset(ds, function(p, i) {
-                        qassert.equal(ds[i].state, 'y');
+                        qassert.equal(ds[i].state, _RESOLVED);
                         qassert.equal(ds[i].value, dataset[i]);
-                        qassert.equal(p.state, 'y');
+                        qassert.equal(p.state, _RESOLVED);
                         qassert.equal(p.value, ds[i].value);
                     }, done);
                 }, 10);
@@ -487,7 +490,7 @@ describe ('q-promise', function(){
             var called;
             P.onResolve(function(v, p, state) { called = [v, p, state] });
             p._resolve(123);
-            qassert.deepEqual(called, [123, p, 'y']);
+            qassert.deepEqual(called, [123, p, _RESOLVED]);
             done();
         })
 
@@ -495,7 +498,7 @@ describe ('q-promise', function(){
             var called;
             P.onResolve(function(v, p, state) { called = [v, p, state] });
             p._reject(123);
-            qassert.deepEqual(called, [123, p, 'n']);
+            qassert.deepEqual(called, [123, p, _REJECTED]);
             done();
         })
     })
