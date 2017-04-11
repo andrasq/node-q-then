@@ -74,6 +74,21 @@ describe ('q-promise', function(){
             done();
         })
 
+        it ('should resolve with function return value', function(done) {
+            var p = P.resolve(function(){ return 123 });
+            qassert.equal(p.state, 'y');
+            qassert.equal(p.value, 123);
+            done();
+        })
+
+        it ('should reject if function throws', function(done) {
+            var err = new Error("die");
+            var p = P.resolve(function(){ throw err });
+            qassert.equal(p.state, 'n');
+            qassert.equal(p.value, err);
+            done();
+        })
+
         it ('should call __resolve on a value', function(done) {
             var called;
             P.onResolve(function(v, p, s){ called = [v, p, s] });
@@ -97,6 +112,21 @@ describe ('q-promise', function(){
             qassert(p instanceof P);
             qassert.equal(p.state, 'n');
             qassert.equal(p.value, 123);
+            done();
+        })
+
+        it ('should reject with function return value', function(done) {
+            var p = P.reject(function(){ return 123 });
+            qassert.equal(p.state, 'n');
+            qassert.equal(p.value, 123);
+            done();
+        })
+
+        it ('should reject if function throws', function(done) {
+            var err = new Error("die2");
+            var p = P.reject(function(){ throw err });
+            qassert.equal(p.state, 'n');
+            qassert.equal(p.value, err);
             done();
         })
 
