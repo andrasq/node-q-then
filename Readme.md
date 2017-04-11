@@ -9,6 +9,9 @@ made to be, with moderately good success; see the Benchmarks below.
 Functionality is minimal; the goal was not to be a full package, but
 to implement a fast promises engine.
 
+**Work in progress.** Not all the Promise/A+ tests pass, and some features are
+better left unimplemented (eg, `then` attached to `Number.prototype`)
+
 
 Benchmarks
 ==========
