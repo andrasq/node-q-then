@@ -90,16 +90,15 @@ This function is exactly equivalent to calling `promise.then(null, reject)`.
 
 ## promise.race( array )
 
-TBD
-
-Make the promise take on the value of the first promise in the array to be
-fulfilled or rejected.
+Return a new promise that will take on the value of the first promise in the array
+to be fulfilled or rejected.
 
 ## promise.all( array )
 
-TBD
-
-Make the promise wait for all promises in the array to be fulfilled or rejected.
+Return a new promise that will wait for all promises in the array to be fulfilled,
+and resolves with the array of their values in the same order as the promises.  If
+any of the promises in the array reject, the returned promise will reject with the
+same cause without waiting for the other promises to settle.
 
 
 Resources
