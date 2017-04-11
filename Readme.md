@@ -78,6 +78,18 @@ Create a new promise that will reject with the given reason.
         // reason => 123
     })
 
+## P.race( array )
+
+Create a new promise that will take on the value of the first promise in the array
+to be fulfilled or rejected.
+
+## P.all( array )
+
+Create a new promise that will wait for all promises in the array to be fulfilled,
+and resolves with the array of their values in the same order as the promises.  If
+any of the promises in the array reject, the returned promise will reject with the
+same cause without waiting for the other promises to settle.
+
 ## promise.then( resolve, reject )
 
 Once the promise has been finalized (either fulfilled or rejected), call the
@@ -87,18 +99,6 @@ Once the promise has been finalized (either fulfilled or rejected), call the
 
 If the promise is rejected, call the function `reject` with the reason.
 This function is exactly equivalent to calling `promise.then(null, reject)`.
-
-## promise.race( array )
-
-Return a new promise that will take on the value of the first promise in the array
-to be fulfilled or rejected.
-
-## promise.all( array )
-
-Return a new promise that will wait for all promises in the array to be fulfilled,
-and resolves with the array of their values in the same order as the promises.  If
-any of the promises in the array reject, the returned promise will reject with the
-same cause without waiting for the other promises to settle.
 
 
 Resources
