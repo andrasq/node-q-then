@@ -167,6 +167,45 @@ describe ('q-promise', function(){
     })
 
     describe ('then', function(){
+        var dataset = [
+            0,
+            false,
+            null,
+            undefined,
+            123,
+            "foo",
+            new Date("2001-01-01T00:00:00.000Z"),
+            /foobar/i,
+            {a:1},
+            [1,3,5],
+            {test:1},
+        ];
+
+        function testDatasetEventuallyResolved( dataset, verifyCb, done ) {
+            var i = 0, v;
+            forEachParallel(
+                dataset,
+                function(v, i, next) {
+                    var p = new P(function(y,n){ setTimeout(y, 5, v) });
+                    var p2 = p.then();                                  // from promise
+                    var p3 = p.then(function(){ return v });            // from resolveHandler
+                    var p4 = p.then(null, function(){ return v });      // from rejectHandler
+                    var p5 = p.then(function(){ return P.resolve(v) });                                 // from already resolved promise
+                    var p6 = p.then(function(){ return new P(function(y,n){ setTimeout(y, 5, v) }) });  // from eventually resolved promise
+                    setTimeout(function() {
+                        verifyCb(p, i);
+                        verifyCb(p2, i);
+                        verifyCb(p3, i);
+                        verifyCb(p4, i);
+                        verifyCb(p5, i);
+                        verifyCb(p6, i);
+                        next();
+                    }, 15);
+                },
+                done
+            );
+        }
+
         it ('should return a new promise', function(done) {
             var p2 = p.then();
             qassert.equal(p2.constructor, p.constructor);
@@ -216,6 +255,14 @@ describe ('q-promise', function(){
                     qassert.equal(p2.value, 123);
                     done();
                 })
+            }
+        })
+
+        it ('should take state from eventually resolved promise', function(done) {
+            testDatasetEventuallyResolved(dataset, checkValue, done);
+            function checkValue( p, i ) {
+                qassert.equal(p.state, _RESOLVED);
+                qassert.equal(p.value, dataset[i]);
             }
         })
 
@@ -520,8 +567,14 @@ describe ('q-promise', function(){
             });
         })
 
-        it ('should resolve a thenable', function(done) {
-            done();
+        it ('should take state from a promise that eventually fulfills with undefined', function(done) {
+            var p = new P(function(y,n){ setTimeout(y, 5, undefined) })
+            var p2 = p.then();
+            setTimeout(function(){
+                qassert.equal(p.state, _RESOLVED);
+                qassert.strictEqual(p.value, undefined);
+                done();
+            }, 10);
         })
 
         it ('should resolve a value returned by a then resolve', function(done) {
