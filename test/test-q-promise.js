@@ -218,7 +218,8 @@ describe ('q-promise', function(){
                         verifyCb(p5, i);
                         verifyCb(p6, i);
                         next();
-                    }, 15);
+                    }, 20);
+                    // TODO: 15 ms not enough, occasionally not resolved yet (?!)
                 },
                 done
             );
