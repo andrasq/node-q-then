@@ -113,6 +113,9 @@ same reason without waiting for the other promises to settle.
 
 Once the promise has been finalized (either fulfilled or rejected), call the
 `resolveHandler` or `rejectHandler` function with the resolving value or rejection reason.
+If the handler returns a value, the promise will resolve with that value.  If the
+handler throws, the promise will reject with that error.  Non-function handlers are
+ignored.
 
 ## promise.catch( rejectHandler )
 
