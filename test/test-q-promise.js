@@ -83,6 +83,24 @@ describe ('q-promise', function(){
             qassert.deepEqual(called, [123, p, _REJECTED]);
             done();
         })
+
+        it ('should resolve with first result', function(done) {
+            var err = new Error("die");
+
+            var p = new P(function(y, n){ y(1); n(2); throw err; });
+            qassert.equal(p.state, _RESOLVED);
+            qassert.equal(p.value, 1);
+
+            var p = new P(function(y, n){ n(2); y(1); throw err; });
+            qassert.equal(p.state, _REJECTED);
+            qassert.equal(p.value, 2);
+
+            var p = new P(function(y, n){ throw err; y(1); n(2); });
+            qassert.equal(p.state, _REJECTED);
+            qassert.equal(p.value, err);
+
+            done();
+        })
     })
 
     describe ('resolve', function(){
