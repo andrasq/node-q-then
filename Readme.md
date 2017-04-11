@@ -88,7 +88,7 @@ to be fulfilled or rejected.
 Create a new promise that will wait for all promises in the array to be fulfilled,
 and resolves with the array of their values in the same order as the promises.  If
 any of the promises in the array reject, the returned promise will reject with the
-same cause without waiting for the other promises to settle.
+same reason without waiting for the other promises to settle.
 
 ## promise.then( resolve, reject )
 
