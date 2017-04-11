@@ -421,7 +421,7 @@ describe ('q-promise', function(){
             }, done);
         })
 
-        it ('should resolve pending promises that are fulfilled by resolve', function(done) {
+        it ('should resolve pending promises that are eventually fulfilled', function(done) {
             var ds = [];
             for (var i=0; i<dataset.length; i++) ds[i] = (function(v){
                 return new P(function(resolve, reject) {
