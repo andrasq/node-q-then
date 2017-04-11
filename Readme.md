@@ -109,15 +109,15 @@ and resolves with the array of their values in the same order as the promises.  
 any of the promises in the array reject, the returned promise will reject with the
 same reason without waiting for the other promises to settle.
 
-## promise.then( resolve, reject )
+## promise.then( [resolveHandler [,rejectHandler]] )
 
 Once the promise has been finalized (either fulfilled or rejected), call the
-`resolve` or `reject` function with the resolving value or rejection reason.
+`resolveHandler` or `rejectHandler` function with the resolving value or rejection reason.
 
-## promise.catch( reject )
+## promise.catch( rejectHandler )
 
-If the promise is rejected, call the function `reject` with the reason.
-This function is exactly equivalent to calling `promise.then(null, reject)`.
+If the promise is rejected, call the function `rejectHandler` with the reason.
+This function is exactly equivalent to calling `promise.then(null, rejectHandler)`.
 
 
 Resources
