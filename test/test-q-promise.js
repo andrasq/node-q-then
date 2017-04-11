@@ -1,10 +1,27 @@
+/**
+ * q-promise -- very fast promises engine
+ *
+ * Copyright (C) 2017 Andras Radics
+ * Licensed under the Apache License, Version 2.0
+ */
+
 'use strict';
 
 var qassert = require('qassert');
 var P = require('../');
+
 var _PENDING = P._PENDING;
 var _RESOLVED = P._RESOLVED;
 var _REJECTED = P._REJECTED;
+
+qassert.isRejectedWith = function(p, v) {
+    this.equal(p.state, _REJECTED);
+    this.equal(p.value, v);
+}
+qassert.isResolvedWith = function(p, v) {
+    this.equal(p.state, _RESOLVED);
+    this.equal(p.value, v);
+}
 
 describe ('q-promise', function(){
 
@@ -200,6 +217,37 @@ describe ('q-promise', function(){
                     done();
                 })
             }
+        })
+
+        it ('should eventually resolve from resolveHandler', function(done) {
+            var thenfunc = function(){};
+            thenfunc.then = function(y,n){ setTimeout(y, 10, 77) };
+            var dataset = [
+                77,
+                {a:77},
+                new P(function(y,n){ setTimeout(y, 10, 77) }),
+                {then: function(y,n){ setTimeout(y, 10, 77) }},
+                thenfunc,
+            ];
+
+            var ds = [];
+            for (var i=0; i<dataset.length; i++) ds[i] = (function(i, val) {
+                return new P(function(y,n){ setTimeout(y, 5, val) }).then(function(v2){
+                    qassert.ok(v2 == 77 || v2.a == 77);
+                    return 88;
+                });
+            })(i, dataset[i]);
+
+            setTimeout(function(){
+                forEachParallel(ds, function(v, i, next) {
+                    qassert.equal(ds[i].state, _RESOLVED);
+                    qassert.equal(ds[i].value, 88);
+                    next();
+                }, function(err) {
+                    done();
+                });
+            }, 20);
+            // note: it can take 10ms for values to propagate?!
         })
 
         it ('should reject if resolve throws', function(done) {
