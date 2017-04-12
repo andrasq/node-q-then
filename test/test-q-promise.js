@@ -14,13 +14,16 @@ var _PENDING = P._PENDING;
 var _RESOLVED = P._RESOLVED;
 var _REJECTED = P._REJECTED;
 
-qassert.isRejectedWith = function(p, v) {
-    this.equal(p.state, _REJECTED);
-    this.equal(p.value, v);
+qassert.isPending = function(p) {
+    qassert.equal(p.state, _PENDING);
 }
-qassert.isResolvedWith = function(p, v) {
-    this.equal(p.state, _RESOLVED);
-    this.equal(p.value, v);
+qassert.isRejectedWith = function(v, p) {
+    qassert.equal(p.state, _REJECTED);
+    qassert.deepEqual(p.value, v);
+}
+qassert.isResolvedWith = function(v, p) {
+    qassert.equal(p.state, _RESOLVED);
+    qassert.deepEqual(p.value, v);
 }
 
 describe ('q-promise', function(){
@@ -181,6 +184,94 @@ describe ('q-promise', function(){
             var p = P.reject(function(){ return 123 });
             qassert.deepEqual(called, [123, p, _REJECTED]);
             done();
+        })
+    })
+
+    describe ('race', function(){
+        it ('should resolve with the first value resolved', function(done) {
+            var p2 = new P(function(y,n){ setTimeout(y, 5, 2) });
+            var p3 = new P(function(y,n){ setTimeout(y, 7, 3) });
+            var p1 = new P(function(y,n){ setTimeout(y, 3, 1) });
+            var p = P.race([p1, p2, p3]);
+            p.then(function(v) {
+                qassert.equal(v, 1);
+                qassert.isResolvedWith(1, p1);
+                qassert.isPending(p2);
+                qassert.isPending(p3);
+                done();
+            }, function(e){ qassert.fail() })
+        })
+
+        it ('should reject if first promise to settle rejects', function(done) {
+            var p2 = new P(function(y,n){ setTimeout(y, 5, 2) });
+            var p3 = new P(function(y,n){ setTimeout(n, 3, 3) });
+            var p = P.race([p2, p3]);
+            p.then(function(v){ qassert.fail() }, function(e) {
+                qassert.equal(e, 3);
+                qassert.isRejectedWith(3, p3);
+                qassert.isPending(p2);
+                done();
+            })
+        })
+
+        it ('should reject if one of the promises is not a thenable', function(done) {
+            var p = P.race([P.resolve(1), 2]);
+            qassert.equal(p.state, _REJECTED);
+            done();
+        })
+    })
+
+    describe ('all', function(){
+        it ('empty promises list should resolve immediately', function(done) {
+            var p = P.all([]);
+            qassert.isResolvedWith([], p);
+            done();
+        })
+
+        it ('should wait for all promises', function(done) {
+            var p1 = new P(function(y,n){ setTimeout(y, 3, 1) });
+            var p2 = new P(function(y,n){ setTimeout(y, 5, 2) });
+            var p3 = new P(function(y,n){ setTimeout(y, 7, 3) });
+            var p = P.all([p1, p2, p3]);
+            p.then(function(v) {
+                qassert.deepEqual(v, [1, 2, 3]);
+                qassert.isResolvedWith(1, p1);
+                qassert.isResolvedWith(2, p2);
+                qassert.isResolvedWith(3, p3);
+                done();
+            })
+        })
+
+        it ('should reject if any promise rejects', function(done) {
+            var p1 = new P(function(y,n){ setTimeout(y, 3, 1) });
+            var p2 = new P(function(y,n){ setTimeout(n, 5, 2) });
+            var p3 = new P(function(y,n){ setTimeout(y, 7, 3) });
+            var p = P.all([p1, p2, p3]);
+            p.then(null, function(v) {
+                qassert.equal(v, 2);
+                qassert.isResolvedWith(1, p1);
+                qassert.isRejectedWith(2, p2);
+                qassert.isPending(p3);
+                done();
+            })
+        })
+
+        it ('should reject if one of the promises is not a thenable', function(done) {
+            var p = P.all([P.resolve(1), 2]);
+            qassert.equal(p.state, _REJECTED);
+            done();
+        })
+
+        it ('should reject if one of the promises throws', function(done) {
+            var p1 = P.resolve(1);
+            var p2 = new P(function(y,n){ throw 2 });
+            var p = P.all([p1, p2]);
+            p.then(null, function(v) {
+                qassert.equal(v, 2);
+                qassert.isResolvedWith(1, p1);
+                qassert.isRejectedWith(2, p2);
+                done();
+            })
         })
     })
 
@@ -503,6 +594,49 @@ describe ('q-promise', function(){
             p._reject(1);
             p._reject(2);
             qassert.equal(p.value, 1);
+            done();
+        })
+
+        it ('should resolve if thenable resolves', function(done) {
+            var thenable = { then: function(y, n) {
+                setTimeout(y, 5, 123);
+            }};
+            var p = new P();
+            p._resolve(thenable);
+            p.then(function(v){
+                qassert.equal(v, 123);
+                qassert.isResolvedWith(123, p);
+                done();
+            }, function(e){ qassert.fail})
+        })
+
+        it ('should reject if thenable rejects', function(done) {
+            var thenable = { then: function(y, n) {
+                setTimeout(n, 5, 123);
+            }};
+            var p = new P();
+            p._resolve(thenable);
+            p.then(function(v){ qassert.fail() }, function(e){
+                qassert.equal(e, 123);
+                qassert.isRejectedWith(123, p);
+                done();
+            })
+        })
+
+        it ('should reject if a thenable throws', function(done) {
+            var thenable = { then: function(){ throw new Error("die") } };
+            var p = P.resolve(thenable);
+            qassert.equal(p.state, _REJECTED);
+            qassert.equal(p.value.message, "die");
+            done();
+        })
+
+        it ('should reject if resolving with self', function(done) {
+            var p = new P();
+            p._resolve(p);
+            qassert.equal(p.state, _REJECTED);
+            qassert.contains(p.value.message, "cannot resolve");
+            qassert.contains(p.value.message, "with itself");
             done();
         })
 
