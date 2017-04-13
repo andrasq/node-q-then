@@ -429,6 +429,18 @@ describe ('q-promise', function(){
             })
         })
 
+        it ('should reject if getting then method throws', function(done) {
+            // setters are ES5
+            if (process.version < '6.') return done();
+
+            var err = new Error("then access error");
+            var thenable = { get then() { throw err } };
+            var p2 = p._resolve(thenable);
+            qassert.equal(p2, p);
+            qassert.isRejectedWith(err, p2);
+            done();
+        })
+
         it ('should call resolve without this from system stack', function(done) {
             (function localStackMarker() {
                 var called;
@@ -471,6 +483,15 @@ describe ('q-promise', function(){
             p._reject(123);
             setImmediate(function() {
                 qassert.equal(called, 123);
+                done();
+            })
+        })
+
+        it ('should ignore non-function listeners and settle with reject cause', function(done) {
+            p.then("one", "two");
+            p._reject(123);
+            setImmediate(function() {
+                qassert.isRejectedWith(123, p);
                 done();
             })
         })
