@@ -177,13 +177,13 @@ qtimeit.bench({
 
     'node': function(cb) { typeof Promise != 'undefined' ? testLoop(Promise, cb) : cb() },
 
-    'promise': function(cb) { testLoop(promis, cb) },
+    'Bluebird': function(cb) { testLoop(Bluebird, cb) },
 
     'es6-promise': function(cb) { testLoop(es6, cb) },
 
     'rsvp': function(cb) { testLoop(RSVP, cb) },
 
-    'Bluebird': function(cb) { testLoop(Bluebird, cb) },
+    'promise': function(cb) { testLoop(promis, cb) },
 
     'q-promise': function(cb) { testLoop(P, cb) },
 },
