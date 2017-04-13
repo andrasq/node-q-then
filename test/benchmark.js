@@ -17,6 +17,7 @@ var qtimeit = require('qtimeit');
 var Bluebird = require('bluebird').Promise;
 var promis = require('promise');
 var RSVP = require('rsvp').Promise
+var es6 = require('es6-promise').Promise;
 
 
 var x;
@@ -177,6 +178,8 @@ qtimeit.bench({
     'node': function(cb) { typeof Promise != 'undefined' ? testLoop(Promise, cb) : cb() },
 
     'promise': function(cb) { testLoop(promis, cb) },
+
+    'es6-promise': function(cb) { testLoop(es6, cb) },
 
     'rsvp': function(cb) { testLoop(RSVP, cb) },
 

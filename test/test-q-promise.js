@@ -430,11 +430,10 @@ describe ('q-promise', function(){
         })
 
         it ('should reject if getting then method throws', function(done) {
-            // setters are ES5
-            if (process.version < '6.') return done();
-
             var err = new Error("then access error");
-            var thenable = { get then() { throw err } };
+            var thenable = { };
+            // ES5 "get then() { ... }" syntax expressed in node v0.10 compatible way
+            Object.defineProperty(thenable, 'then', { get: function(){ throw err } });
             var p2 = p._resolve(thenable);
             qassert.equal(p2, p);
             qassert.isRejectedWith(err, p2);
