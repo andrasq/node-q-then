@@ -8,6 +8,9 @@
     "url": "git://github.com/andrasq/node-q-promise",
     "type": "git"
   },
+  "engines": {
+    "node": "^0.10"
+  },
   "keywords": [ "fast", "promise", "Andras", "async" ],
   "scripts": {
     "coverage": "nyc --version && nyc --reporter lcov --reporter text qnit test/test* || echo nyc not installed",
