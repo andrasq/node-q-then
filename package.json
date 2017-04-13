@@ -1,6 +1,6 @@
 {
   "name": "q-promise",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "main": "index.js",
   "description": "very fast nodejs promises engine",
   "license": "Apache-2.0",

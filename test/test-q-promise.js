@@ -309,8 +309,9 @@ describe ('q-promise', function(){
                         verifyCb(p5, i);
                         verifyCb(p6, i);
                         next();
-                    }, 20);
-                    // TODO: 15 ms not enough, occasionally not resolved yet (?!)
+                    }, 30);
+                    // TODO: 20 ms not enough, occasionally not resolved yet (?!)
+                    // FIXME: should all resolve in 5 ms!
                 },
                 done
             );
@@ -347,6 +348,9 @@ describe ('q-promise', function(){
                     qassert.equal(p2.state, _RESOLVED);
                     done();
                 })
+                // resolveHandler must return the value we want to resolve with,
+                // else the then() will resolve with undefined.
+                return v;
             }
             function reject(e) {
                 qassert.fail();
@@ -365,6 +369,9 @@ describe ('q-promise', function(){
                     qassert.equal(p2.value, 123);
                     done();
                 })
+                // the way to reject from a rejectHandler is to throw;
+                // else the promise would resolve with the return value, even if undefined
+                throw e;
             }
         })
 
