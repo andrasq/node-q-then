@@ -202,6 +202,17 @@ describe ('q-promise', function(){
             }, function(e){ qassert.fail() })
         })
 
+        it ('should resolve with the first thenable resolved', function(done) {
+            var p1 = { then: function(y,n){ setTimeout(y, 5, 1) } };
+            var p2 = { then: function(y,n){ setTimeout(y, 7, 2) } };
+            var p3 = new P(function(y,n){ setTimeout(y, 9, 3) });
+            var p = P.race([p1, p2, p3]);
+            p.then(function(v) {
+                qassert.equal(v, 1);
+                done();
+            }, function(e) { qassert.fail() })
+        })
+
         it ('should reject if first promise to settle rejects', function(done) {
             var p2 = new P(function(y,n){ setTimeout(y, 5, 2) });
             var p3 = new P(function(y,n){ setTimeout(n, 3, 3) });
@@ -624,10 +635,15 @@ describe ('q-promise', function(){
             done();
         })
 
-        it ('should resolve if thenable resolves', function(done) {
-            var thenable = { then: function(y, n) {
-                setTimeout(y, 5, 123);
-            }};
+        it ('should resolve if thenable eventually resolves', function(done) {
+            // returns a thenable that returns a thenable that returns a thenable that returns 123
+            var thenable = {
+                then: function(y, n) { setTimeout(y, 5, {
+                    then: function(y, n) { setTimeout(y, 5, {
+                        then: function(y, n) { setTimeout(y, 5, 123) }
+                    }) }
+                }) }
+            };
             var p = new P();
             p._resolve(thenable);
             p.then(function(v){
