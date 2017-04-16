@@ -26,6 +26,23 @@ qassert.isResolvedWith = function(v, p) {
     qassert.deepEqual(p.value, v);
 }
 
+// a promise that asynchronously resolves to x
+function _async( x, yesno, ms ) {
+    return new P(function(y, n) {
+        var fn = (yesno == 'n' || !yesno) ? n : y; 
+        ms >= 0 ? setTimeout(fn, ms, x) : setImmediate(fn, x);
+    });
+}
+
+function _asyncThenable( x, yesno, ms ) {
+    return {
+        then: function(y, n) {
+            var fn = (yesno == 'n' || !yesno) ? n : y; 
+            ms >= 0 ? setTimeout(y, ms, x) : setImmediate(y, x);
+        }
+    };
+}
+
 describe ('q-promise', function(){
 
     var p;
