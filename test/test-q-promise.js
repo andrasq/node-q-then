@@ -216,7 +216,8 @@ describe ('q-promise', function(){
                 qassert.isPending(p2);
                 qassert.isPending(p3);
                 done();
-            }, function(e){ qassert.fail() })
+            }, function(e){ done(e) })
+            .catch(function(e){ done(e) });
         })
 
         it ('should resolve with the first thenable resolved', function(done) {
@@ -227,7 +228,8 @@ describe ('q-promise', function(){
             p.then(function(v) {
                 qassert.equal(v, 1);
                 done();
-            }, function(e) { qassert.fail() })
+            }, function(e) { done(e) })
+            .catch(function(e){ done(e) });
         })
 
         it ('should reject if first promise to settle rejects', function(done) {
