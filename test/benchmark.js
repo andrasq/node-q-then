@@ -139,7 +139,7 @@ var ncalls = 0;
 qtimeit.bench.opsPerTest = nloops;
 qtimeit.bench.timeGoal = 2;
 qtimeit.bench.visualize = true;
-qtimeit.bench.baselineAvg = 1000000;
+qtimeit.bench.baselineAvg = 2000000;
 
 function waitForEnd( wantCount, cb ) {
     process.nextTick(function testEnd() {
