@@ -139,6 +139,7 @@ var ncalls = 0;
 qtimeit.bench.opsPerTest = nloops;
 qtimeit.bench.timeGoal = 2;
 qtimeit.bench.visualize = true;
+qtimeit.bench.baselineAvg = 1000000;
 
 function waitForEnd( wantCount, cb ) {
     process.nextTick(function testEnd() {
@@ -157,6 +158,7 @@ function testLoop( PP, cb ) {
     var callsAtStart = ncalls;
     for (var i=0; i<nloops; i++) {
         x = PP.resolve('foo').then(function(s){ return PP.resolve(s + 'bar') }).then(function(s) { ncalls++; return PP.resolve(s + 'baz')})
+        //x = PP.resolve('foo').then(function(s){ return _async(s + 'bar') }).then(function(s) { ncalls++; return _async(s + 'baz')})
         //x = PP.resolve('foo').then(function(s){ ncalls++; return 1234 });
     }
     if (cb) waitForEnd(callsAtStart + nloops, cb);
