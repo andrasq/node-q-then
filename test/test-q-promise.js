@@ -792,6 +792,60 @@ describe ('q-promise', function(){
             }, 10);
         })
 
+        it ('should resolve with first executor to resolve', function(done) {
+            var p1 = _async(1, 'y', 10);
+            var p2 = _async(2, 'n', 2);
+            var t1 = Date.now();
+            var p = new P(function(y, n) { setTimeout(y, 1, p1); setTimeout(n, 3, p2) });
+            p.then(function(v) {
+                var t2 = Date.now();
+                qassert.equal(v, 1);
+                qassert.ok(t2 - t1 >= 10-1);
+                done();
+            }, function(e) { done(e) })
+            .catch(function(e) { done(e) });
+        })
+
+        it ('should reject with first executor to reject', function(done) {
+            var p1 = _async(1, 'y', 2);
+            var p2 = _async(2, 'n', 10);
+            var t1 = Date.now();
+            var p = new P(function(y, n) { setTimeout(y, 3, p1); setTimeout(n, 1, p2) });
+            p.then(function(v) { done(v) },
+            function(e) {
+                var t2 = Date.now();
+                qassert.equal(e, 2);
+                qassert.ok(t2 - t1 >= 10-1);
+                done();
+            })
+            .catch(function(e) { done(e) });
+        })
+
+        it ('should ignore error thrown after resolve', function(done) {
+            var t1 = Date.now();
+            var p = new P(function(y, n) { y(_async(123, 'y', 10)); throw 77 });
+            p.then(function(v) {
+                var t2 = Date.now();
+                qassert.equal(v, 123);
+                qassert.ok(t2 - t1 >= 10-1);
+                done();
+            }, function(e) { done(e) })
+            .catch(function(e) { done(e) });
+        })
+
+        it ('should ignore error thrown after reject', function(done) {
+            var t1 = Date.now();
+            var p = new P(function(y, n) { y(_async(123, 'n', 10)); throw 77 });
+            p.then(function(v) { done("fail") },
+            function(e) {
+                var t2 = Date.now();
+                qassert.equal(e, 123);
+                qassert.ok(t2 - t1 >= 10-1);
+                done();
+            })
+            .catch(function(e) { done(e) });
+        })
+
         it ('should resolve a value returned by a then resolve', function(done) {
             done();
         })
