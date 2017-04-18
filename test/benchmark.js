@@ -36,7 +36,7 @@ function noop(a,b){ }
 // 25m/s minimal; 18m/s testing for thenable
 // 31m/s
 
-if (1) {
+if (0) {
 qtimeit(10000000, function(){ x = new P(noop) });
 // 40m/s
 qtimeit(1000000, function(){ x = P.resolve(1) });
@@ -174,17 +174,11 @@ function mikeTest( PP, cb ) {
 testLoop = mikeTest;
 
 qtimeit.bench({
-
     'node': function(cb) { typeof Promise != 'undefined' ? testLoop(Promise, cb) : cb() },
-
     'Bluebird': function(cb) { testLoop(Bluebird, cb) },
-
     'es6-promise': function(cb) { testLoop(es6, cb) },
-
     'rsvp': function(cb) { testLoop(RSVP, cb) },
-
     'promise': function(cb) { testLoop(promis, cb) },
-
     'q-promise': function(cb) { testLoop(P, cb) },
 },
 function(){
