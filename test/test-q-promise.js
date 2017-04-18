@@ -597,6 +597,16 @@ describe ('q-promise', function(){
                 done();
             });
         })
+
+        it ('should ignore errors thrown in a thenable then callback after it fulfillled', function(done) {
+            var thenable = { then: function(y,n) { y(_async(1, 'y', 5)); throw "then err after return" } };
+            var p1 = new P(function(y,n) { y(thenable) });
+            p1.then(function(v) {
+                qassert.equal(v, 1);
+                done();
+            },function(e) { done(e) })
+            .catch(function(e) { done(e) });
+        })
     })
 
     describe ('catch', function(){
