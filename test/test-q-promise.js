@@ -15,13 +15,16 @@ var _RESOLVED = P._RESOLVED;
 var _REJECTED = P._REJECTED;
 
 qassert.isPending = function(p) {
+    //p.then(function(v) { qassert.ok(1) }, function(e) { qassert.fail() });
     qassert.equal(p.state, _PENDING);
 }
 qassert.isRejectedWith = function(v, p) {
+    //p.then(function(v) { qassert.fail() }, function(e) { qassert.equal(e, v) });
     qassert.equal(p.state, _REJECTED);
     qassert.deepEqual(p.value, v);
 }
 qassert.isResolvedWith = function(v, p) {
+    //p.then(function(v2) { qassert.equal(v2, v) }, function(e) { qassert.fail });
     qassert.equal(p.state, _RESOLVED);
     qassert.deepEqual(p.value, v);
 }
@@ -768,25 +771,28 @@ describe ('q-promise', function(){
             });
         })
 
-        it ('should resolve pending promises that are eventually rejected', function(done) {
+        it ('should reject pending promises that are eventually rejected with a promise', function(done) {
             var ds = [];
-            for (var i=0; i<dataset.length; i++) ds[i] = (function(v){
-                return new P(function(resolve, reject) {
-                    setTimeout(reject, 5, P.resolve(v));
-                })
-            })(dataset[i]);
+            var ps = [];
+            // the dataset is promises that will eventually reject with a resolved promise
+            for (var i=0; i<dataset.length; i++) {
+                ps[i] = P.resolve(dataset[i]);
+                ds[i] = (function(i){ return _async(ps[i], 'n', 5) })(i);
+            }
+            // while the dataset is pending, promises resolved with them are also pending
             testDataset(ds, function(p, i) {
                 qassert.ok(!ds[i].state);
                 qassert.ok(!p.state);
             },
+            // once resolved, promises resolved with them will take on the reject value
             function(err) {
                 if (err) return done(err);
                 setTimeout(function() {
                     testDataset(ds, function(p, i) {
-                        qassert.equal(ds[i].state, _RESOLVED);
-                        qassert.equal(ds[i].value, dataset[i]);
-                        qassert.equal(p.state, _RESOLVED);
-                        qassert.equal(p.value, ds[i].value);
+                        // ds[i] will have been rejected with ps[i]
+                        qassert.isRejectedWith(ps[i], ds[i]);
+                        // p that was fulfilled with ds[i] will have taken on its state and value
+                        qassert.isRejectedWith(ps[i], p);
                     }, done);
                 }, 10);
             });
@@ -802,10 +808,11 @@ describe ('q-promise', function(){
             }, 10);
         })
 
-        it ('should resolve with first executor to resolve', function(done) {
+        it ('should resolve with first executor to return', function(done) {
             var p1 = _async(1, 'y', 10);
             var p2 = _async(2, 'n', 2);
             var t1 = Date.now();
+            // executor resolves after 1ms with an eventual promise that will resolve
             var p = new P(function(y, n) { setTimeout(y, 1, p1); setTimeout(n, 3, p2) });
             p.then(function(v) {
                 var t2 = Date.now();
@@ -816,16 +823,33 @@ describe ('q-promise', function(){
             .catch(function(e) { done(e) });
         })
 
-        it ('should reject with first executor to reject', function(done) {
-            var p1 = _async(1, 'y', 2);
-            var p2 = _async(2, 'n', 10);
+        it ('should reject with first executor to return', function(done) {
+            var p1 = _async(1, 'n', 10);
+            var p2 = _async(2, 'n', 2);
             var t1 = Date.now();
+            // executor resolves after 1ms with an eventual promise that will reject
+            var p = new P(function(y, n) { setTimeout(y, 1, p1); setTimeout(n, 3, p2) });
+            p.then(function(v) { done(v) },
+            function(e) {
+                var t2 = Date.now();
+                qassert.equal(e, 1);
+                qassert.ok(t2 - t1 >= 10-1);
+                done();
+            })
+            .catch(function(e) { done(e) });
+        })
+
+        it ('should reject immediately if executor rejects', function(done) {
+            var p1 = _async(1, 'y', 2);
+            var p2 = _async(2, 'y', 10);
+            var t1 = Date.now();
+            // executor rejects after 1ms with an eventual promise that will resolve
             var p = new P(function(y, n) { setTimeout(y, 3, p1); setTimeout(n, 1, p2) });
             p.then(function(v) { done(v) },
             function(e) {
                 var t2 = Date.now();
-                qassert.equal(e, 2);
-                qassert.ok(t2 - t1 >= 10-1);
+                qassert.ok(t2 - t1 <= 1+1, "did not reject immediately");
+                qassert.equal(e, p2, "did not reject with promise object");
                 done();
             })
             .catch(function(e) { done(e) });
