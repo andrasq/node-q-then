@@ -23,45 +23,38 @@ var es6 = require('es6-promise').Promise;
 var x;
 
 function noop(a,b){ }
+
 // qtimeit(10000000, function(){ x = new P() });
 // 138m/s
 // 130m/s if no resolver handling, 45m/s if testing resolver, 53m/s if resolver=false
 // 130m/s if resolver=false and running testing in another func
 // 138m/s if resolver not passed and running testing in another func
-qtimeit(10000000, function(){ x = new P(noop) });
-// 40m/s
-// 37m/s to invoke resolver with on-the-fly constructed bindigs w/o assigning them
-// 28m/s inside try/catch, 21m/s if wrapped in an additional function
-// 36m/s if resolver is run in a separate func
 
-qtimeit(1000000, function(){ x = new P().then(1) })
+//qtimeit(1000000, function(){ x = new P().then(1) })
 // 59m/s
-qtimeit(1000000, function(){ x = new P(noop).then(1) })
+//qtimeit(1000000, function(){ x = new P(noop).then(1) })
 // 25m/s minimal; 18m/s testing for thenable
 // 31m/s
 
-if (0) {
+if (1) {
 qtimeit(10000000, function(){ x = new P(noop) });
 // 40m/s
 qtimeit(1000000, function(){ x = P.resolve(1) });
-// 64m/s (81m/s minimal, 57m/s 3-way test)
+// 76m/s
 qtimeit(1000000, function(){ x = P.resolve({}) });
-// 31m/s
+// 42m/s
 qtimeit(1000000, function(){ x = P.resolve(123).then() });
-// 11m/s
+// 63m/s
 qtimeit(1000000, function(){ x = P
     .resolve('foo')
     .then(function(str){ return str + 'bar' })
     .then(function(str){ return str + 'zed' }); });
-// 8m/s; 5.5m/s v8.x
-// 8m/s v5.10, 6.3m/s 10k
+// 1.4m/s
 qtimeit(1000000, function(){ x = P
     .resolve('foo')
     .then(function(str){ return P.resolve(str + 'bar') })
     .then(function(str){ return P.resolve(str + 'baz') }) });
-// 3.8m/s; 2.9m/s v8.x, 2.35m/s v8.x 10k
-// 2.35m/s v8.x 10k, 2.9m/s v8.x 1m
-// NOTE: 7 mb heapUsed; 1.43 elapsed
+// 2m/s
 }
 
 if (0) {
