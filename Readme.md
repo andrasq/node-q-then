@@ -9,8 +9,7 @@ made to be, with moderately good success; see the Benchmarks below.
 Functionality is minimal; the goal was not to be a full package, but
 to implement a fast promises engine.
 
-**Work in progress.** Not all the Promise/A+ tests pass, and some features are
-better left unimplemented (eg, `then` attached to `Number.prototype`)
+As of version 0.5.2 all the Promises/A+ tests pass.
 
 
 Benchmarks
@@ -69,9 +68,9 @@ Api
 ## new P( executor(resolve, reject) )
 
 Create a promise and call the `executor` function.  The executor will use the
-provided `resolve` or `reject` functions to settle (either fulfill with a value or
-reject with a reason) the created promise.  Use the `promise.then` method to add
-callbacks to the promise to be notified when the promise is settled.
+provided `resolve` or `reject` functions to settle the created promise (either
+fulfill with a value or reject with a reason).  Use the `promise.then` method to
+add callbacks to be notified when the promise is settled.
 
 A newly constructed promise is in the "pending" state; it can transition into
 "fulfilled" with a value or "rejected" with a reason.  Once no longer pending the
@@ -79,9 +78,10 @@ state and value of the promise do not change.
 
 ## P.resolve( value )
 
-Create a new promise that will resolve with the value.
-Value can be a function, a promise (a _thenable_ actually), or
-some other value.
+Create a new promise that will resolve with the value.  Value can be a function, a
+promise (any _thenable_), or some other value.  Functions are resolved with their return value.
+Terminal values resolve immediate.  For thenables the promise will take on the value and status
+of the thenable when it resolves, either fulfilled with a value or rejected with a reason.
 
     var promise = P.resolve(123);
     promise.then(function resolve(value) {
@@ -90,7 +90,8 @@ some other value.
 
 ## P.reject( reason )
 
-Create a new promise that will reject with the given reason.
+Create a new promise that will reject with the given reason.  The reason is used as
+is, even if it is a thenable (thenables are not waited to resolve).
 
     var promise = P.reject(123);
     promise.then(null, function reject(reason) {
@@ -109,24 +110,44 @@ and resolves with the array of their values in the same order as the promises.  
 any of the promises in the array reject, the returned promise will reject with the
 same reason without waiting for the other promises to settle.
 
-## promise.then( [resolveHandler [,rejectHandler]] )
+## promise.then( [resolveHandler(value) [,rejectHandler(reason)]] )
 
-Once the promise has been finalized (either fulfilled or rejected), call the
-`resolveHandler` or `rejectHandler` function with the resolving value or rejection reason.
-If the handler returns, the promise will resolve with the returned value.  If the
-handler throws, the promise will reject with that reason.  Non-function handlers are
-ignored.
+Create a new promise that will notify the appropriate handler just before settling and
+will settle with the value returned by the handler, or will reject with the thrown
+reason.  If the appropriate handler is not a function, the new promise takes on the
+value and state of `promise` when it eventually settles.
+
+If the promise is about to fulfill and a `resolveHandler` is given, it passes the
+fulfill value from `promise` to the handler and fulfills with the value returned by
+the handler instead.  If the handler throws, the promise rejects with the thrown error
+as the reason.  If `resolveHandler` is not a function, the promise fulfills with the
+original value.
+
+If the promise is about to reject and a `rejectHandler` is given, it passes the reason
+`promise` rejected to the handler, and *fulfills* with the value returned by the
+handler.  Note that if `rejectHandler` returns, the new promise fulfills; to reject,
+the handler must throw.  If `resolveHandler` is not a function, the promise rejects
+with the original reason.
+
+    var p1 = Promise.resolve(1);
+    var p2 = p1.then(function(v) { console.log("p1 fulfilled with", v); return 2 },
+                     function(e) { console.log("p1 rejected with", e); return 3 });
+    var p3 = p2.then(function(v) { console.log("p2 fulfilled with", v) },
+                     function(e) { console.log("p2 rejected with", e) });
+    // => p1 fulfilled with 1
+    // => p2 fulfilled with 2
 
 ## promise.catch( rejectHandler )
 
-If the promise is rejected, call the function `rejectHandler` with the reason.
-This function is exactly equivalent to calling `promise.then(null, rejectHandler)`.
+If the promise is rejected, call the function `rejectHandler` with the reason and
+fulfill with the value returned by the handler.  This function is exactly equivalent
+to calling `promise.then(null, rejectHandler)`.
 
 
 Resources
 =========
 
-- [MDN Promise](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) - javascript Promise writeup
+- [MDN Promise reference](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) - javascript Promise writeup
 - [Promises/A+](https://promisesaplus.com/) - javascript promises interoperability spec
 - [Promises/A+ tests](https://github.com/promises-aplus/promises-tests)
 
