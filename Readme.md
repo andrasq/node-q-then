@@ -15,33 +15,33 @@ As of version 0.5.2 all the Promises/A+ tests pass.
 Benchmarks
 ==========
 
-Resolve the promise (q-promise 0.5.4, resolving 2000 promises like the below in a
-tight loop for 2 seconds):
+Resolve the eventually resolved promise (batches of 2000 promises run by `qtimeit` in
+a tight loop for 10 seconds.  Results in resolves/second, each batch contributing 2000):
 
-    var ncalls = 0;
     function make(){
-        return new PP(function(resolve, reject) { resolve('foo') });
+        return new PP(function(resolve, reject) { setImmediate(function(){ resolve('foo') }) });
     }
-    var x;
+    var x, ncalls = 0;
     make().then(function(v){ ncalls++; return x = v; });
 
 $ node-v6.7.0 test/benchmark.js
 
     qtimeit=0.17.0 platform=linux kernel=3.16.0-4-amd64 cpuCount=8
-    node=6.7.0 v8=5.1.281.83 arch=ia32 mhz=4523 cpu="Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz" up_threshold=11
+    node=6.7.0 v8=5.1.281.83 arch=ia32 mhz=4522 cpu="Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz" up_threshold=11
     name  speed  (stats)  rate
-    node            1,072,830 ops/sec (5 runs of 200 calls in 1.864 out of 2.684 sec, +/- 0.00%)    536 >>>
-    Bluebird        4,175,463 ops/sec (14 runs of 200 calls in 1.341 out of 2.343 sec, +/- 0.00%)  2088 >>>>>>>>>>
-    es6-promise     4,016,423 ops/sec (14 runs of 200 calls in 1.394 out of 2.423 sec, +/- 0.00%)  2008 >>>>>>>>>>
-    rsvp            4,742,373 ops/sec (15 runs of 200 calls in 1.265 out of 2.345 sec, +/- 0.00%)  2371 >>>>>>>>>>>>
-    promise         6,619,192 ops/sec (12 runs of 400 calls in 1.450 out of 2.437 sec, +/- 0.00%)  3310 >>>>>>>>>>>>>>>>>
-    q-promise       9,987,469 ops/sec (5 runs of 2k calls in 2.003 out of 2.755 sec, +/- 0.00%)    4994 >>>>>>>>>>>>>>>>>>>>>>>>>
+    node              921,485 ops/sec (72 runs of 40 calls in 6.251 out of 10.476 sec, +/- 0.00%)   921 >>>>>
+    Bluebird        3,395,890 ops/sec (60 runs of 200 calls in 7.067 out of 10.368 sec, +/- 0.00%) 3396 >>>>>>>>>>>>>>>>>
+    es6-promise     2,990,209 ops/sec (55 runs of 200 calls in 7.357 out of 10.417 sec, +/- 0.00%) 2990 >>>>>>>>>>>>>>>
+    rsvp            2,805,561 ops/sec (52 runs of 200 calls in 7.414 out of 10.332 sec, +/- 0.00%) 2806 >>>>>>>>>>>>>>
+    promise         4,267,206 ops/sec (70 runs of 200 calls in 6.562 out of 10.316 sec, +/- 0.00%) 4267 >>>>>>>>>>>>>>>>>>>>>
+    q-promise       4,986,076 ops/sec (78 runs of 200 calls in 6.257 out of 10.375 sec, +/- 0.00%) 4986 >>>>>>>>>>>>>>>>>>>>>>>>>
 
-(run in isolation:)
+(run in isolation for 2 seconds:)
 
-    node            1,085,536 ops/sec (5 runs of 200 calls in 1.842 out of 2.658 sec, +/- 0.00%)    543 >>>
-    promise         7,370,428 ops/sec (13 runs of 400 calls in 1.411 out of 2.544 sec, +/- 0.00%)  3685 >>>>>>>>>>>>>>>>>>
-    q-promise      11,815,840 ops/sec (6 runs of 2k calls in 2.031 out of 2.930 sec, +/- 0.00%)    5908 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    node              921,819 ops/sec (15 runs of 40 calls in 1.302 out of 2.515 sec, +/- 0.00%)    922 >>>>>
+    Bluebird        3,539,432 ops/sec (13 runs of 200 calls in 1.469 out of 2.556 sec, +/- 0.00%)  3539 >>>>>>>>>>>>>>>>>>
+    promise         4,693,169 ops/sec (15 runs of 200 calls in 1.278 out of 2.455 sec, +/- 0.00%)  4693 >>>>>>>>>>>>>>>>>>>>>>>
+    q-promise       5,636,982 ops/sec (11 runs of 400 calls in 1.561 out of 2.617 sec, +/- 0.00%)  5637 >>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 Api

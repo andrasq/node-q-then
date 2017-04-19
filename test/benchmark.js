@@ -132,7 +132,7 @@ var ncalls = 0;
 qtimeit.bench.opsPerTest = nloops;
 qtimeit.bench.timeGoal = 2;
 qtimeit.bench.visualize = true;
-qtimeit.bench.baselineAvg = 2000000;
+qtimeit.bench.baselineAvg = 1000000;
 
 function waitForEnd( wantCount, cb ) {
     process.nextTick(function testEnd() {
@@ -159,8 +159,11 @@ function testLoop( PP, cb ) {
 function mikeTest( PP, cb ) {
     var callsAtStart = ncalls;
     function make() {
+        return new PP(function(resolve, reject) { setImmediate(function(){ resolve('foo') }) });
+        //return new PP(function(resolve, reject) { process.nextTick(function(){ resolve('foo') }) });
+        //return new PP(function(resolve, reject) { setImmediate(resolve, 'foo') });
         //return new PP(function(resolve, reject) { ncalls++; resolve('foo') });
-        return new PP(function(resolve, reject) { resolve('foo') });
+        //return new PP(function(resolve, reject) { resolve('foo') });
         //return new PP(function(resolve, reject) { setTimeout(function(){ resolve('foo') }, 1) });
     }
     for (var i=0; i<nloops; i++) {
