@@ -306,6 +306,16 @@ describe ('q-promise', function(){
                 done();
             })
         })
+
+        it ('should reject if a thenable throws', function(done) {
+            var p = P.all([ P.resolve(1), { then: function(y, n) { throw 2 } } ]);
+            p.then(function(v) {
+                done("test failed, did not reject");
+            }, function(e) {
+                qassert.equal(e, 2);
+                done();
+            })
+        })
     })
 
     describe ('then', function(){
@@ -667,6 +677,19 @@ describe ('q-promise', function(){
             done();
         })
 
+        it ('should not resolve an already resolved promise with a settled promise', function(done) {
+            var p1 = _async(1, 'y');
+            var p2 = P.resolve(2);
+            p._resolve(p1);
+            p._resolve(p2);
+            p.then(function(v) {
+                qassert.equal(v, 1);
+                done();
+            }).catch(function(e) {
+                done(e || "test failed");
+            });
+        })
+
         it ('should resolve if thenable eventually resolves', function(done) {
             // returns a thenable that returns a thenable that returns a thenable that returns 123
             var thenable = {
@@ -881,11 +904,37 @@ describe ('q-promise', function(){
         })
 
         it ('should resolve a value returned by a then resolve', function(done) {
-            done();
+            var thenable = { then: function(y, n) { y(_async(123, 'y')) } };
+            var p = new P(function(y,n){ y(thenable) });
+            p.then(function(v) {
+                qassert.equal(v, 123);
+                done();
+            }, function(e) {
+                done(e || "test failed");
+            });
         })
 
         it ('should resolve a thenable returned by a then resolve', function(done) {
+            var thenable2 = { then: function(y, n) { y(_async(123, 'y')) } };
+            var thenable1 = { then: function(y, n) { y(thenable2) } };
+            var p = new P(function(y,n){ y(thenable1) });
+            p.then(function(v){
+                qassert.equal(v, 123);
+                done();
+            }, function(e) {
+                done(e || "test failed");
+            })
             done();
+        })
+
+        it ('should ignore a reject or resolve or errors from a thenable that already resolved', function(done) {
+            var thenable = { then: function(y, n) { y(1); n(2); y(3); n(4); throw new Error("thenable error") } };
+            p._resolve(thenable).then(function(v){
+                qassert.equal(v, 1);
+                done();
+            }, function(e) {
+                done(e || "test failed");
+            });
         })
     })
 
