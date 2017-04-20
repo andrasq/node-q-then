@@ -12,13 +12,13 @@
 
 // /* quicktest:
 
-var P = require('../');
+var P = require('../').Promise;
 var qtimeit = require('qtimeit');
 var Bluebird = require('bluebird').Promise;
 var promis = require('promise');
 var RSVP = require('rsvp').Promise
 var es6 = require('es6-promise').Promise;
-
+var when = require('when').Promise;
 
 var x;
 
@@ -151,7 +151,9 @@ function testLoop( PP, cb ) {
     var callsAtStart = ncalls;
     for (var i=0; i<nloops; i++) {
         x = PP.resolve('foo').then(function(s){ return PP.resolve(s + 'bar') }).then(function(s) { ncalls++; return PP.resolve(s + 'baz')})
+        //x = PP.resolve('foo').then(function(s){ return PP.resolve(s + 'bar') }).then(function(s) { ncalls++; return PP.resolve(s + 'baz')})
         //x = PP.resolve('foo').then(function(s){ return _async(s + 'bar') }).then(function(s) { ncalls++; return _async(s + 'baz')})
+        //x = PP.resolve('foo').then(function(s){ return _async(s + 'bar') }).then(function(s) { return _async(s + 'baz')}).then(function(s){ ncalls++; return _async(s + 'bat')})
         //x = PP.resolve('foo').then(function(s){ ncalls++; return 1234 });
     }
     if (cb) waitForEnd(callsAtStart + nloops, cb);
@@ -179,8 +181,9 @@ testLoop = mikeTest;
 qtimeit.bench({
     'node': function(cb) { typeof Promise != 'undefined' ? testLoop(Promise, cb) : cb() },
     'Bluebird': function(cb) { testLoop(Bluebird, cb) },
-    'es6-promise': function(cb) { testLoop(es6, cb) },
     'rsvp': function(cb) { testLoop(RSVP, cb) },
+    'es6-promise': function(cb) { testLoop(es6, cb) },
+    'when': function(cb) { testLoop(when, cb) },
     'promise': function(cb) { testLoop(promis, cb) },
     'q-promise': function(cb) { testLoop(P, cb) },
 },

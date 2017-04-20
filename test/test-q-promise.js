@@ -8,7 +8,7 @@
 'use strict';
 
 var qassert = require('qassert');
-var P = require('../');
+var P = require('../').Promise;
 
 var _PENDING = P._PENDING;
 var _RESOLVED = P._RESOLVED;
