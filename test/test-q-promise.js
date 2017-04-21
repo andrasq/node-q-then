@@ -248,6 +248,15 @@ describe ('q-promise', function(){
             })
         })
 
+        it ('should reject if a thenable throws getting the then method', function(done) {
+            var thenable = { };
+            Object.defineProperty(thenable, 'then', { get: function(){ throw 123 } });
+            P.race([ thenable ]).then(
+                function(v) { done("test failed") },
+                function(e) { qassert.equal(e, 123); done() }
+            );
+        })
+
         it ('should reject if one of the promises is not a thenable', function(done) {
             var p = P.race([P.resolve(1), 2]);
             qassert.equal(p.state, _REJECTED);
@@ -316,6 +325,15 @@ describe ('q-promise', function(){
                 qassert.equal(e, 2);
                 done();
             })
+        })
+
+        it ('should reject if a thenable throws getting the then method', function(done) {
+            var thenable = { };
+            Object.defineProperty(thenable, 'then', { get: function(){ throw 123 } });
+            P.all([ thenable ]).then(
+                function(v) { done("test failed") },
+                function(e) { qassert.equal(e, 123); done() }
+            );
         })
     })
 
