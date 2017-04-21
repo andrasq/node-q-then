@@ -7,7 +7,7 @@
  * 2017-04-13 - AR.
  */
 
-var P = require('../');
+var P = require('../').Promise;
 var tests = require('promises-aplus-tests');
 
 var PP;
