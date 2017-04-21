@@ -11,6 +11,7 @@ var qassert = require('qassert');
 var P = require('../').Promise;
 
 var _PENDING = P._PENDING;
+var _RESOLVING = P._RESOLVING;
 var _RESOLVED = P._RESOLVED;
 var _REJECTED = P._REJECTED;
 
