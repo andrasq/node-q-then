@@ -1,11 +1,11 @@
 {
-  "name": "q-promise",
+  "name": "q-then",
   "version": "0.7.0",
   "main": "index.js",
   "description": "very fast nodejs promises engine",
   "license": "Apache-2.0",
   "repository": {
-    "url": "git://github.com/andrasq/node-q-promise",
+    "url": "git://github.com/andrasq/node-q-then",
     "type": "git"
   },
   "engines": {

@@ -1,5 +1,5 @@
 /**
- * q-promise -- very fast promises engine
+ * q-then -- very fast promises engine
  *
  * Copyright (C) 2017 Andras Radics
  * Licensed under the Apache License, Version 2.0
@@ -19,6 +19,7 @@ var promis = require('promise');
 var RSVP = require('rsvp').Promise
 var es6 = require('es6-promise').Promise;
 var when = require('when').Promise;
+var q = require('q').Promise;
 
 var x;
 
@@ -181,17 +182,18 @@ testLoop = mikeTest;
 console.log("benchmarking: nloops=%d, func=", nloops, testLoop.toString().replace(/^\s*\/\/.*\n/mg, ''));
 qtimeit.bench({
     'node': function(cb) { typeof Promise != 'undefined' ? testLoop(Promise, cb) : cb() },
+    // 'q': function(cb) { testLoop(q, cb) },   // q is very slow, and completely tramples the other results
     'es6-promise': function(cb) { testLoop(es6, cb) },
     'rsvp': function(cb) { testLoop(RSVP, cb) },
     'Bluebird': function(cb) { testLoop(Bluebird, cb) },
     'when': function(cb) { testLoop(when, cb) },
     'promise': function(cb) { testLoop(promis, cb) },
-    'q-promise': function(cb) { testLoop(P, cb) },
+    'q-then': function(cb) { testLoop(P, cb) },
 },
 function(){
     //x = P.resolve(3);
     setTimeout(function(){ 
-        // q-promise resolves on the next event loop tick, wait for it
+        // q-then resolves on the next event loop tick, wait for it
         console.log("AR: %d calls total, got", ncalls, x);
     }, 1);
     console.log(process.memoryUsage());

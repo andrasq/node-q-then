@@ -1,1 +1,1 @@
-module.exports = require('./lib/q-promise.js');
+module.exports = require('./lib/q-then.js');

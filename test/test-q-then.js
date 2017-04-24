@@ -1,5 +1,5 @@
 /**
- * q-promise -- very fast promises engine
+ * q-then -- very fast promises engine
  *
  * Copyright (C) 2017 Andras Radics
  * Licensed under the Apache License, Version 2.0
@@ -47,7 +47,7 @@ function _asyncThenable( x, yesno, ms ) {
     };
 }
 
-describe ('q-promise', function(){
+describe ('q-then', function(){
 
     var p;
 

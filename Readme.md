@@ -1,5 +1,5 @@
-q-promise
-=========
+q-then
+======
 
 Very fast bare-bones Promise/A+ compatible nodejs promises.
 
@@ -34,14 +34,14 @@ $ node-v6.7.0 test/benchmark.js
     es6-promise     2,990,209 ops/sec (55 runs of 200 calls in 7.357 out of 10.417 sec, +/- 0.00%) 2990 >>>>>>>>>>>>>>>
     rsvp            2,805,561 ops/sec (52 runs of 200 calls in 7.414 out of 10.332 sec, +/- 0.00%) 2806 >>>>>>>>>>>>>>
     promise         4,267,206 ops/sec (70 runs of 200 calls in 6.562 out of 10.316 sec, +/- 0.00%) 4267 >>>>>>>>>>>>>>>>>>>>>
-    q-promise       4,986,076 ops/sec (78 runs of 200 calls in 6.257 out of 10.375 sec, +/- 0.00%) 4986 >>>>>>>>>>>>>>>>>>>>>>>>>
+    q-then          4,986,076 ops/sec (78 runs of 200 calls in 6.257 out of 10.375 sec, +/- 0.00%) 4986 >>>>>>>>>>>>>>>>>>>>>>>>>
 
 (run in isolation for 2 seconds:)
 
     node              921,819 ops/sec (15 runs of 40 calls in 1.302 out of 2.515 sec, +/- 0.00%)    922 >>>>>
     Bluebird        3,539,432 ops/sec (13 runs of 200 calls in 1.469 out of 2.556 sec, +/- 0.00%)  3539 >>>>>>>>>>>>>>>>>>
     promise         4,693,169 ops/sec (15 runs of 200 calls in 1.278 out of 2.455 sec, +/- 0.00%)  4693 >>>>>>>>>>>>>>>>>>>>>>>
-    q-promise       5,636,982 ops/sec (11 runs of 400 calls in 1.561 out of 2.617 sec, +/- 0.00%)  5637 >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    q-then          5,636,982 ops/sec (11 runs of 400 calls in 1.561 out of 2.617 sec, +/- 0.00%)  5637 >>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 Api
@@ -136,7 +136,7 @@ Resources
 Related Work
 ============
 
-- [`q-promise`](https://github.com/andrasq/node-q-promise) - very fast promises engine
+- [`q-then`](https://github.com/andrasq/node-q-then) - very fast promises engine
 - [`bluebird`](https://npmjs.com/package/bluebird) - fast promises package
 - [`promise`](https://npmjs.com/package/promise) - promises package
 - [`rsvp`](https://npmjs.com/package/rsvp) - promises package
