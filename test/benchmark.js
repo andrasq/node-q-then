@@ -178,6 +178,7 @@ function mikeTest( PP, cb ) {
 }
 testLoop = mikeTest;
 
+console.log("benchmarking: nloops=%d, func=", nloops, testLoop.toString().replace(/^\s*\/\/.*\n/mg, ''));
 qtimeit.bench({
     'node': function(cb) { typeof Promise != 'undefined' ? testLoop(Promise, cb) : cb() },
     'es6-promise': function(cb) { testLoop(es6, cb) },
