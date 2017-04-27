@@ -764,13 +764,13 @@ describe ('q-then', function(){
             // chain p3 to p2, when p2 rejects p3 will also
             var p3 = p2.then(null, function(){ throw err2 });
             p._resolve(1);
-            setImmediate(function() {
+            setTimeout(function() {
                 qassert.equal(p2.state, _REJECTED);
                 qassert.equal(p2.value, err);
                 qassert.equal(p3.state, _REJECTED);
                 qassert.equal(p3.value, err2);
                 done();
-            })
+            }, 2)
         })
 
         it ('should resolve values', function(done) {
