@@ -974,6 +974,50 @@ describe ('q-then', function(){
             done();
         })
     })
+
+    describe ('promisify', function(){
+        it ('should promisify a function taking a callback', function(done) {
+            var funcCb = function(a,b,cb) { cb(null, this.z + a + b) };
+            var funcP = P.promisify(funcCb);
+            var obj = { z: 11, funcP: funcP };
+            obj.funcP(22, 33).then(
+                function(v){ qassert.equal(v, 66); done() },
+                function(e){ done(new Error("test fail")) }
+            )
+            .catch(function(e){ done(e) });
+        })
+
+        it ('should promisify returned errors', function(done) {
+            var funcCb = function(cb){ cb(new Error("deliberate error")) };
+            var funcP = P.promisify(funcCb);
+            funcP().then(
+                function(v){ throw new Error("test fail") },
+                function(e){ qassert.equal(e.message, "deliberate error"); done() }
+            )
+            .catch(function(e){ done(e) });
+        })
+
+        it ('should promisify thrown errors', function(done) {
+            var funcCb = function(cb){ throw new Error("deliberate error") };
+            var funcP = P.promisify(funcCb);
+            funcP().then(
+                function(v){ throw new Error("test fail") },
+                function(e){ qassert.equal(e.message, "deliberate error"); done() }
+            )
+            .catch(function(e){ done(e) });
+        })
+
+        it ('should promisify with the given Promise library', function(done) {
+            var called = false;
+            function MockPromise( executor ) { called = executor; }
+            var funcP = P.promisify(function(){}, MockPromise);
+            funcP();
+            qassert.equal(typeof called, 'function');
+            qassert.equal(called.name, 'executor');
+            qassert.equal(called.length, 2);
+            done();
+        })
+    })
 })
 
 

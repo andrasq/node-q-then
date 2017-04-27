@@ -1,6 +1,6 @@
 {
   "name": "q-then",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "main": "index.js",
   "description": "very fast nodejs promises engine",
   "license": "Apache-2.0",
@@ -13,7 +13,7 @@
   },
   "keywords": [ "fast", "promise", "Andras", "async" ],
   "scripts": {
-    "coverage": "nyc --version && nyc --reporter lcov --reporter text qnit test/test* || echo nyc not installed",
+    "coverage": "nyc --version && nyc --reporter lcov --reporter text qnit test/test-q* || echo nyc not installed",
     "clean": "rm -rf .nyc_output coverage npm-debug.log",
     "test": "qnit --version && qnit test/test-q* && node -p 'require(\"promises-aplus-tests\")' && node test/test-aplus* || echo qnit not installed, cannot test"
   }
