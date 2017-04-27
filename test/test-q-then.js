@@ -943,7 +943,7 @@ describe ('q-then', function(){
             }, function(e) {
                 done(e || "test failed");
             })
-            done();
+            .catch(function(e){ done(e) });
         })
 
         it ('should ignore a reject or resolve or errors from a thenable that already resolved', function(done) {

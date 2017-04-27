@@ -10,7 +10,7 @@
 'use strict';
 
 
-// /* quicktest:
+var fs = require('fs');
 
 var P = require('../').Promise;
 var qtimeit = require('qtimeit');
