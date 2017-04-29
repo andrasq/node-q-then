@@ -33,7 +33,7 @@ qassert.isResolvedWith = function(v, p) {
 // a promise that asynchronously resolves to x
 function _async( x, yesno, ms ) {
     return new P(function(y, n) {
-        var fn = (yesno == 'n' || !yesno) ? n : y; 
+        var fn = (yesno == 'n') ? n : y;
         ms >= 0 ? setTimeout(fn, ms, x) : setImmediate(fn, x);
     });
 }
@@ -41,7 +41,7 @@ function _async( x, yesno, ms ) {
 function _asyncThenable( x, yesno, ms ) {
     return {
         then: function(y, n) {
-            var fn = (yesno == 'n' || !yesno) ? n : y; 
+            var fn = (yesno == 'n' || !yesno) ? n : y;
             ms >= 0 ? setTimeout(y, ms, x) : setImmediate(y, x);
         }
     };
@@ -50,6 +50,11 @@ function _asyncThenable( x, yesno, ms ) {
 describe ('q-then', function(){
 
     var p;
+
+    before (function(done) {
+        // prime the timers, to try and avoid weird timeout glitches
+        setTimeout(done, 2);
+    })
 
     beforeEach (function(done) {
         p = new P();
@@ -87,7 +92,7 @@ describe ('q-then', function(){
         })
 
         it ('should reject if executor throws', function(done) {
-            var p = new P(function(resolve) { throw new Error("executor error") }); 
+            var p = new P(function(resolve) { throw new Error("executor error") });
             qassert.equal(p.state, _REJECTED, "wanted rejected");
             done();
         })
@@ -639,6 +644,19 @@ describe ('q-then', function(){
             },function(e) { done(e) })
             .catch(function(e) { done(e) });
         })
+
+        it ('should resolve a chain of 20 nested promises', function(done) {
+            function buildThenChain(depth) {
+                if (depth > 1) return P.race([ buildThenChain(depth-1) ]);
+                else return _async(1234);
+            }
+            var p = buildThenChain(20);
+            p.then(function(v){
+                qassert.equal(v, 1234);
+                done();
+            })
+            .catch(function(e){ done("test failed") });
+        })
     })
 
     describe ('catch', function(){
@@ -975,7 +993,7 @@ describe ('q-then', function(){
         })
     })
 
-    describe ('promisify', function(){
+    describe ('promisify', function() {
         it ('should promisify a function taking a callback', function(done) {
             var funcCb = function(a,b,cb) { cb(null, this.z + a + b) };
             var funcP = P.promisify(funcCb);
@@ -1018,6 +1036,68 @@ describe ('q-then', function(){
             done();
         })
     })
+
+    describe ('callbackify', function() {
+        it ('should return value if already resolved', function(done) {
+            var p = P.resolve(123);
+            P.callbackify(p, function(err, val) {
+                qassert.equal(err, null);
+                qassert.equal(val, 123);
+                done();
+            })
+        })
+
+        it ('should return value if already rejected', function(done) {
+            var p = P.reject(321);
+            P.callbackify(p, function(err, val) {
+                qassert.equal(err, 321);
+                done();
+            })
+        })
+
+        it ('should return value if it eventually resolves', function(done) {
+            var p = _async(1234);
+            P.callbackify(p, function(err, val) {
+                qassert.equal(err, null);
+                qassert.equal(val, 1234);
+                done();
+            })
+        })
+
+        it ('should return reason if eventually rejected', function(done) {
+            var p = _async(123, 'n');
+            P.callbackify(p, function(err, val) {
+                qassert.equal(err, 123);
+                done();
+            })
+        })
+
+        it ('should callbackify a resolving thenable', function(done) {
+            var p = { then: function(y,n){ setImmediate(y, 1234) } };
+            P.callbackify(p, function(err, val) {
+                qassert.equal(err, null);
+                qassert.equal(val, 1234);
+                done();
+            })
+        })
+
+        it ('should callbackify a rejecting thenable', function(done) {
+            var p = { then: function(y,n){ setImmediate(n, 1234) } };
+            P.callbackify(p, function(err, val) {
+                qassert.equal(err, 1234);
+                done();
+            })
+        })
+
+        it ('should return error if throws', function(done) {
+            var error = new Error("deliberate error");
+            var p = new P(function(y,n){ throw error });
+            P.callbackify(p, function(err, val) {
+                qassert.equal(err, error);
+                done();
+            })
+        })
+    })
 })
 
 
@@ -1026,19 +1106,15 @@ function testResolvesDataset( tester, cb ) {
     ];
     for (var i=0; i<dataset.length; i++) {
         var p = tester(dataset[i]);
-        
     }
     if (cb) cb();
 }
 
 function repeatWhile( test, loop, cb ) {
     if (!test()) return cb();
-
     loop(function(err) {
         if (err) return cb(err);
-        setImmediate(function(){
-            repeatWhile(test, loop, cb)
-        });
+        setImmediate(repeatWhile, test, loop, cb);
     });
 }
 
