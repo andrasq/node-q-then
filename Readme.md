@@ -15,33 +15,36 @@ As of version 0.5.2 all the Promises/A+ tests pass.
 Benchmarks
 ==========
 
-Resolve the eventually resolved promise (batches of 2000 promises run by `qtimeit` in
-a tight loop for 10 seconds.  Results in resolves/second, each batch contributing 2000):
+Resolve the eventually resolved promises (batches of 2000 promises run by `qtimeit` in
+a tight loop for 10 seconds, each test run in a separate process.  Results in
+resolves/second, each batch contributing 2000):
 
-    function make(){
-        return new PP(function(resolve, reject) { setImmediate(function(){ resolve('foo') }) });
+$ node-v6.10.2 test/benchmark.js
+
+    benchmark: nloops=1000, timeGoal=5, forkTests=true
+    testFunc = function mikeTest( PP, cb ) {
+        function _asyncP(x) { return new PP(function(y, n) { setImmediate(y, x) }); }
+        function _recursiveP(x) { return x > 0 ? _recursiveP(x-1).then(function(v){ return _asyncP(x) }) : PP.resolve(x) }
+
+        var callsAtStart = ncalls;
+        function make() {
+            return _recursiveP(20);
+        }
+        for (var i=0; i<nloops; i++) {
+            make().then(function(v){ ncalls++; return x = v; })
+        }
+        if (cb) waitForEnd(callsAtStart + nloops, cb);
     }
-    var x, ncalls = 0;
-    make().then(function(v){ ncalls++; return x = v; });
-
-$ node-v6.7.0 test/benchmark.js
-
-    qtimeit=0.17.0 platform=linux kernel=3.16.0-4-amd64 cpuCount=8
-    node=6.7.0 v8=5.1.281.83 arch=ia32 mhz=4522 cpu="Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz" up_threshold=11
+    qtimeit=0.18.0 node=6.10.2 v8=5.1.281.98 platform=linux kernel=3.16.0-4-amd64 up_threshold=11
+    arch=ia32 mhz=4206 cpuCount=8 cpu="Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz"
     name  speed  (stats)  rate
-    node              921,485 ops/sec (72 runs of 40 calls in 6.251 out of 10.476 sec, +/- 0.00%)   921 >>>>>
-    Bluebird        3,395,890 ops/sec (60 runs of 200 calls in 7.067 out of 10.368 sec, +/- 0.00%) 3396 >>>>>>>>>>>>>>>>>
-    es6-promise     2,990,209 ops/sec (55 runs of 200 calls in 7.357 out of 10.417 sec, +/- 0.00%) 2990 >>>>>>>>>>>>>>>
-    rsvp            2,805,561 ops/sec (52 runs of 200 calls in 7.414 out of 10.332 sec, +/- 0.00%) 2806 >>>>>>>>>>>>>>
-    promise         4,267,206 ops/sec (70 runs of 200 calls in 6.562 out of 10.316 sec, +/- 0.00%) 4267 >>>>>>>>>>>>>>>>>>>>>
-    q-then          4,986,076 ops/sec (78 runs of 200 calls in 6.257 out of 10.375 sec, +/- 0.00%) 4986 >>>>>>>>>>>>>>>>>>>>>>>>>
-
-(run in isolation for 2 seconds:)
-
-    node              921,819 ops/sec (15 runs of 40 calls in 1.302 out of 2.515 sec, +/- 0.00%)    922 >>>>>
-    Bluebird        3,539,432 ops/sec (13 runs of 200 calls in 1.469 out of 2.556 sec, +/- 0.00%)  3539 >>>>>>>>>>>>>>>>>>
-    promise         4,693,169 ops/sec (15 runs of 200 calls in 1.278 out of 2.455 sec, +/- 0.00%)  4693 >>>>>>>>>>>>>>>>>>>>>>>
-    q-then          5,636,982 ops/sec (11 runs of 400 calls in 1.561 out of 2.617 sec, +/- 0.00%)  5637 >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    node           15,012 ops/sec (11 runs of 4 calls in 2.931 out of 6.301 sec, +/- 0.01%)      300 >>
+    when           53,978 ops/sec (11 runs of 20 calls in 4.076 out of 5.864 sec, +/- 0.00%)    1080 >>>>>
+    rsvp           57,737 ops/sec (12 runs of 20 calls in 4.157 out of 6.027 sec, +/- 0.00%)    1155 >>>>>>
+    es6-promise    40,701 ops/sec (25 runs of 4 calls in 2.457 out of 5.751 sec, +/- 0.01%)      814 >>>>
+    Bluebird       64,971 ops/sec (13 runs of 20 calls in 4.002 out of 5.819 sec, +/- 0.01%)    1299 >>>>>>
+    promise       143,934 ops/sec (24 runs of 20 calls in 3.335 out of 5.560 sec, +/- 0.01%)    2879 >>>>>>>>>>>>>>
+    q-then        185,489 ops/sec (29 runs of 20 calls in 3.127 out of 5.519 sec, +/- 0.00%)    3710 >>>>>>>>>>>>>>>>>>>
 
 
 Api

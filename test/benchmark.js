@@ -11,6 +11,7 @@
 
 
 var fs = require('fs');
+var util = require('util');
 
 var P = require('../').Promise;
 var qtimeit = require('qtimeit');
@@ -131,9 +132,10 @@ qtimeit(10000, function(){ x = Promise
 var nloops = 2000;
 var ncalls = 0;
 qtimeit.bench.opsPerTest = nloops;
-qtimeit.bench.timeGoal = 2;
+qtimeit.bench.timeGoal = 5;
 qtimeit.bench.visualize = true;
-qtimeit.bench.baselineAvg = 1000000;
+qtimeit.bench.baselineAvg = 50000;
+qtimeit.bench.forkTests = true;
 
 function waitForEnd( wantCount, cb ) {
     process.nextTick(function testEnd() {
@@ -143,28 +145,51 @@ function waitForEnd( wantCount, cb ) {
     })
 }
 
-// a promise that asynchronously resolves to x
-function _async(x) {
-    return new P(function(y, n) { setImmediate(y, x) });
-}
-
 function testLoop( PP, cb ) {
+    // a promise that asynchronously resolves to x
+    function _asyncP(x) { return new PP(function(y, n) { setImmediate(y, x) }); }
+    //function _recursiveP(x) { return x > 0 ? _recursiveP(x-1).then(function(v){ return _asyncP(x) }) : PP.resolve(x) }
+    function _recursiveAllP(x) { return x > 0 ? _recursiveAllP(x-1).then(function(v){ return _asyncP(x) }) : PP.all([ _asyncP(1), _asyncP(2) ]) }
+    //function _recursiveAll10P(x) { return x > 0 ? _recursiveAll10P(x-1).then(function(v){ return _asyncP(x) }) : PP.all([ 1,2,3,4,5,6,7,8,9,10 ].map(function(x){ return _asyncP(x) })) }
+    //function _wrap1(fn, x) { return new PP(function(y,n){ fn(x, function(e,v){ e ? n(e) : y(v) }) }) }
+    //function _wrap1f(fn) { return function(x){ var self = this; return new PP(function(y,n){ fn.call(self, x, function(e,v){ e ? n(e) : y(v) }) }) } }
+    //var statP = _wrap1f(fs.stat)
+    //var readdirP = _wrap1f(fs.readdir)
+    //var readFileP = _wrap1f(fs.readFile)
+
     var callsAtStart = ncalls;
     for (var i=0; i<nloops; i++) {
         //x = PP.resolve('foo').then(function(s){ return PP.resolve(s + 'bar') }).then(function(s) { ncalls++; return PP.resolve(s + 'baz')})
-        //x = PP.resolve('foo').then(function(s){ return _async(s + 'bar') }).then(function(s) { ncalls++; return _async(s + 'baz')})
-        x = PP.resolve('foo').then(function(s){ return _async(s + 'bar') }).then(function(s) { return _async(s + 'baz')}).then(function(s){ ncalls++; return _async(s + 'bat')})
+        //x = PP.resolve('foo').then(function(s){ return _asyncP(s + 'bar') }).then(function(s) { ncalls++; return _asyncP(s + 'baz')})
+        //x = PP.resolve('foo').then(function(s){ return _asyncP(s + 'bar') }).then(function(s) { return _asyncP(s + 'baz')}).then(function(s){ ncalls++; return _asyncP(s + 'bat')})
+        //x = PP.resolve(1).then((v) => _asyncP(v)).then((v) => _asyncP(v)).then((v) => _asyncP(v)).then((v) => _asyncP(v)).then((v) => _asyncP(v))
+        //    .then((v) => _asyncP(v)).then((v) => _asyncP(v)).then((v) => _asyncP(v)).then((v) => _asyncP(v)).then((v) => _asyncP(ncalls++));
+        //x = _recursiveP(20).then(function(v){ ncalls++; return v });
+        x = _recursiveAllP(20).then(function(v){ ncalls++; return v });
+        //x = _recursiveAll10P(20).then(function(v){ ncalls++; return v });
+        //x = readdirP("/").then(function(v){ return PP.all(v.slice(0,2).map(function(x){ return statP("/"+x) })) }).then(function(v){ ncalls++; return v },function(e){ ncalls++; throw e });
+        //x = _wrap1(fs.readdir, "/").then(function(v){ return PP.all(v.slice(0,2).map(function(x){ return _wrap1(fs.stat, "/"+x) })) }).then(function(v){ ncalls++; return v },function(e){ ncalls++; throw e });
+        //x = _wrap1(fs.readdir, "/").then(function(v){ return _wrap1(fs.stat, "/"+v[0]) }).then(function(v){ ncalls++; return v },function(e){ ncalls++; throw e });
+        //x = readdirP("/").then(function(v){ return statP("/"+v[0]) }).then(function(v){ ncalls++; return v },function(e){ ncalls++; throw e });
+        //x = _wrap1(fs.stat, "/etc/motd").then(function(v){ return _wrap1(fs.readFile, "/etc/motd") }).then(function(v){ ncalls++; return v.toString() })
+        //x = statP("/etc/motd").then(function(v){ return readFileP("/etc/motd") }).then(function(v){ ncalls++; return v.toString() })
+        // nb: static fs ops are 3x faster than promisified async version
+        //x = P.resolve( ++ncalls && fs.readdirSync("/").slice(0,4).map(function(x){ return fs.statSync("/"+x) }) );
         //x = PP.resolve('foo').then(function(s){ ncalls++; return 1234 });
     }
     if (cb) waitForEnd(callsAtStart + nloops, cb);
 }
 function mikeTest( PP, cb ) {
+    function _asyncP(x) { return new PP(function(y, n) { setImmediate(y, x) }); }
+    function _recursiveP(x) { return x > 0 ? _recursiveP(x-1).then(function(v){ return _asyncP(x) }) : PP.resolve(x) }
+
     var callsAtStart = ncalls;
     function make() {
         //return new PP(function(resolve, reject) { setImmediate(function(){ resolve('foo') }) });
         //return new PP(function(resolve, reject) { process.nextTick(function(){ resolve('foo') }) });
         //return new PP(function(resolve, reject) { process.nextTick(resolve, 'foo') });
-        return new PP(function(resolve, reject) { setImmediate(resolve, 'foo') });
+        //return new PP(function(resolve, reject) { setImmediate(resolve, 'foo') });
+        return _recursiveP(20);
         //return new PP(function(resolve, reject) { ncalls++; resolve('foo') });
         //return new PP(function(resolve, reject) { resolve('foo') });
         //return new PP(function(resolve, reject) { setTimeout(function(){ resolve('foo') }, 1) });
@@ -179,14 +204,19 @@ function mikeTest( PP, cb ) {
 }
 testLoop = mikeTest;
 
-console.log("benchmarking: nloops=%d, func=", nloops, testLoop.toString().replace(/^\s*\/\/.*\n/mg, ''));
+qtimeit.bench.preRunMessage =
+    util.format("benchmark: nloops=%d, timeGoal=%d, forkTests=%s", nloops, qtimeit.bench.timeGoal, qtimeit.bench.forkTests) + "\n" +
+    "testFunc = " + testLoop.toString().replace(/^\s*\/\/.*\n/mg, '');
+//console.log("benchmarking: nloops=%d", nloops);
+//console.log("testFunc = %s", testLoop.toString().replace(/^\s*\/\/.*\n/mg, ''));
 qtimeit.bench({
+//    'Bluebird': function(cb) { testLoop(Bluebird, cb) },
     'node': function(cb) { typeof Promise != 'undefined' ? testLoop(Promise, cb) : cb() },
     // 'q': function(cb) { testLoop(q, cb) },   // q is very slow, and completely tramples the other results
-    'es6-promise': function(cb) { testLoop(es6, cb) },
-    'rsvp': function(cb) { testLoop(RSVP, cb) },
-    'Bluebird': function(cb) { testLoop(Bluebird, cb) },
     'when': function(cb) { testLoop(when, cb) },
+    'rsvp': function(cb) { testLoop(RSVP, cb) },
+    'es6-promise': function(cb) { testLoop(es6, cb) },
+    'Bluebird': function(cb) { testLoop(Bluebird, cb) },
     'promise': function(cb) { testLoop(promis, cb) },
     'q-then': function(cb) { testLoop(P, cb) },
 },
@@ -194,9 +224,9 @@ function(){
     //x = P.resolve(3);
     setTimeout(function(){ 
         // q-then resolves on the next event loop tick, wait for it
-        console.log("AR: %d calls total, got", ncalls, x);
+        //console.log("AR: %d calls total, got", ncalls, x);
+        //console.log(process.memoryUsage());
     }, 1);
-    console.log(process.memoryUsage());
 
 })
 
