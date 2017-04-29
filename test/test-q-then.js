@@ -340,6 +340,35 @@ describe ('q-then', function(){
                 function(e) { qassert.equal(e, 123); done() }
             );
         })
+
+        it ('a promise should participate in multiple all', function(done) {
+            // test _notifyThenListeners multiple-listeners listener function handling
+            var p = _async(1234);
+            var p2 = P.all([p]);
+            var p3 = P.all([p, p2]);
+            p2.then(function(v){
+                qassert.deepEqual(v, [1234]);
+            })
+            p3.then(function(v){
+                qassert.deepEqual(v, [1234, [1234]]);
+                done();
+            })
+            .catch(function(e){ done(e) })
+        })
+
+        it ('should wait for multiple thenables', function(done) {
+            // test __resolveGenericThenable callback handling
+            var p1 = { then: function(y,n){ setImmediate(y, 123) } };
+            var p2 = { then: function(y,n){ setImmediate(n, 456) } };
+            var p = P.all([ p1, p2 ]);
+            p.then(
+                function(v){ done("test failed") },
+                function(e){
+                    qassert.equal(e, 456);
+                    done();
+                }
+            );
+        })
     })
 
     describe ('then', function(){
