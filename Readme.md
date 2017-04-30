@@ -21,6 +21,7 @@ resolves/second, each batch contributing 2000):
 
 $ node-v6.10.2 test/benchmark.js
 
+    P: v0.8.0
     benchmark: nloops=1000, timeGoal=5, forkTests=true
     testFunc = function mikeTest( PP, cb ) {
         function _asyncP(x) { return new PP(function(y, n) { setImmediate(y, x) }); }
@@ -38,13 +39,13 @@ $ node-v6.10.2 test/benchmark.js
     qtimeit=0.18.0 node=6.10.2 v8=5.1.281.98 platform=linux kernel=3.16.0-4-amd64 up_threshold=11
     arch=ia32 mhz=4206 cpuCount=8 cpu="Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz"
     name  speed  (stats)  rate
-    node           15,012 ops/sec (11 runs of 4 calls in 2.931 out of 6.301 sec, +/- 0.01%)      300 >>
-    when           53,978 ops/sec (11 runs of 20 calls in 4.076 out of 5.864 sec, +/- 0.00%)    1080 >>>>>
-    rsvp           57,737 ops/sec (12 runs of 20 calls in 4.157 out of 6.027 sec, +/- 0.00%)    1155 >>>>>>
-    es6-promise    40,701 ops/sec (25 runs of 4 calls in 2.457 out of 5.751 sec, +/- 0.01%)      814 >>>>
-    Bluebird       64,971 ops/sec (13 runs of 20 calls in 4.002 out of 5.819 sec, +/- 0.01%)    1299 >>>>>>
-    promise       143,934 ops/sec (24 runs of 20 calls in 3.335 out of 5.560 sec, +/- 0.01%)    2879 >>>>>>>>>>>>>>
-    q-then        185,489 ops/sec (29 runs of 20 calls in 3.127 out of 5.519 sec, +/- 0.00%)    3710 >>>>>>>>>>>>>>>>>>>
+    node           15,386 ops/sec (12 runs of 4 calls in 3.120 out of 6.647 sec, +/- 0.01%)      308 >>
+    when           52,250 ops/sec (11 runs of 20 calls in 4.210 out of 6.008 sec, +/- 0.01%)    1045 >>>>>
+    rsvp           58,368 ops/sec (12 runs of 20 calls in 4.112 out of 6.006 sec, +/- 0.00%)    1167 >>>>>>
+    es6-promise    41,505 ops/sec (25 runs of 4 calls in 2.409 out of 5.689 sec, +/- 0.01%)      830 >>>>
+    Bluebird       63,933 ops/sec (13 runs of 20 calls in 4.067 out of 5.874 sec, +/- 0.01%)    1279 >>>>>>
+    promise       142,504 ops/sec (24 runs of 20 calls in 3.368 out of 5.594 sec, +/- 0.01%)    2850 >>>>>>>>>>>>>>
+    q-then        184,915 ops/sec (29 runs of 20 calls in 3.137 out of 5.556 sec, +/- 0.01%)    3698 >>>>>>>>>>>>>>>>>>
 
 
 Api
@@ -94,6 +95,18 @@ Create a new promise that will wait for all promises in the array to be fulfille
 and resolves with the array of their values in the same order as the promises.  If
 any of the promises in the array reject, the returned promise will reject with the
 same reason without waiting for the other promises to settle.
+
+## P.promisify( func [,PP] )
+
+Convert the callbacked function `func` into a function that does not take callback
+but returns a promise instead.  Also works for methods.  The optional argument `PP`
+is the promise system to use, eg the nodejs built-in `Promise` (the default is `P`).
+
+## P.callbackify( promise, cb )
+
+Convert a promise into a callback invocation.  Note that this is not quite the
+mirror of `promisify`, which returns a function, but callback invocation can be
+made much more efficient once the type of thenable is known.
 
 ## promise.then( [resolveHandler(value) [,rejectHandler(reason)]] )
 

@@ -10,6 +10,7 @@
 'use strict';
 
 
+var Pversion = require('../package.json').version;
 var fs = require('fs');
 var util = require('util');
 
@@ -129,7 +130,7 @@ qtimeit(10000, function(){ x = Promise
 }
 
 
-var nloops = 2000;
+var nloops = 1000;
 var ncalls = 0;
 qtimeit.bench.opsPerTest = nloops;
 qtimeit.bench.timeGoal = 5;
@@ -205,6 +206,7 @@ function mikeTest( PP, cb ) {
 testLoop = mikeTest;
 
 qtimeit.bench.preRunMessage =
+    util.format("P: v" + Pversion) + "\n" +
     util.format("benchmark: nloops=%d, timeGoal=%d, forkTests=%s", nloops, qtimeit.bench.timeGoal, qtimeit.bench.forkTests) + "\n" +
     "testFunc = " + testLoop.toString().replace(/^\s*\/\/.*\n/mg, '');
 //console.log("benchmarking: nloops=%d", nloops);
