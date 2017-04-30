@@ -1,7 +1,7 @@
 q-then
 ======
 
-Very fast bare-bones Promise/A+ compatible nodejs promises.
+Fast bare-bones Promises/A+ compatible nodejs promises.
 
 Written as a an experiment to see how lean the implementation overhead could be
 made to be, with moderately good success; see the Benchmarks below.
@@ -43,7 +43,7 @@ $ node-v6.10.2 test/benchmark.js
     when           52,250 ops/sec (11 runs of 20 calls in 4.210 out of 6.008 sec, +/- 0.01%)    1045 >>>>>
     rsvp           58,368 ops/sec (12 runs of 20 calls in 4.112 out of 6.006 sec, +/- 0.00%)    1167 >>>>>>
     es6-promise    41,505 ops/sec (25 runs of 4 calls in 2.409 out of 5.689 sec, +/- 0.01%)      830 >>>>
-    Bluebird       63,933 ops/sec (13 runs of 20 calls in 4.067 out of 5.874 sec, +/- 0.01%)    1279 >>>>>>
+    bluebird       63,933 ops/sec (13 runs of 20 calls in 4.067 out of 5.874 sec, +/- 0.01%)    1279 >>>>>>
     promise       142,504 ops/sec (24 runs of 20 calls in 3.368 out of 5.594 sec, +/- 0.01%)    2850 >>>>>>>>>>>>>>
     q-then        184,915 ops/sec (29 runs of 20 calls in 3.137 out of 5.556 sec, +/- 0.01%)    3698 >>>>>>>>>>>>>>>>>>
 
@@ -152,9 +152,10 @@ Resources
 Related Work
 ============
 
-- [`q-then`](https://github.com/andrasq/node-q-then) - very fast promises engine
-- [`bluebird`](https://npmjs.com/package/bluebird) - fast promises package
+- [`q-then`](https://github.com/andrasq/node-q-then) - this one
+- [`bluebird`](https://npmjs.com/package/bluebird) - promises package
 - [`promise`](https://npmjs.com/package/promise) - promises package
 - [`rsvp`](https://npmjs.com/package/rsvp) - promises package
+- [`when`](https://npmjs.com/package/when) - promises package
 - [`qinvoke`](https://npmjs.com/package/qinvoke) - fast call interception and re-invocation
 - [`qtimeit`](https://npmjs.com/package/qtimeit) - accurate nodejs call timings
