@@ -15,9 +15,9 @@ As of version 0.5.2 all the Promises/A+ tests pass.
 Benchmarks
 ==========
 
-Resolve the eventually resolved promises (batches of 2000 promises run by `qtimeit` in
+Resolve the eventually resolved promises (batches of 1000 promises run by `qtimeit` in
 a tight loop for 10 seconds, each test run in a separate process.  Results in
-resolves/second, each batch contributing 2000):
+resolves/second, each batch contributing 1000):
 
 $ node-v6.10.2 test/benchmark.js
 
