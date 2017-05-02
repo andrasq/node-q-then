@@ -102,11 +102,18 @@ Convert the callbacked function `func` into a function that does not take callba
 but returns a promise instead.  Also works for methods.  The optional argument `PP`
 is the promise system to use, eg the nodejs built-in `Promise` (the default is `P`).
 
-## P.callbackify( promise, cb )
+## P.callback( promise, cb(err, val) )
 
-Convert a promise into a callback invocation.  Note that this is not quite the
-mirror of `promisify`, which returns a function, but callback invocation can be
-made much more efficient once the type of thenable is known.
+Convert a promise into a callback invocation.  Unlike callbackify, callback invocation
+can be optimized for the type of the thenable.
+
+## P.callbackify( executor, cb(err, val) )
+
+Convert the promise building executor into a callbacked function.  Ie, if the executor
+resolves with a value the callback is called with the value, if it rejects with a
+reason the callback is called with the reason as the error, it it throws the callback
+is called with the error, and if it returns a promise the callback will be called once
+the returned promise settles.
 
 ## promise.then( [resolveHandler(value) [,rejectHandler(reason)]] )
 

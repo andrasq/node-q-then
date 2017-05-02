@@ -1066,10 +1066,10 @@ describe ('q-then', function(){
         })
     })
 
-    describe ('callbackify', function() {
+    describe ('callback', function() {
         it ('should return value if already resolved', function(done) {
             var p = P.resolve(123);
-            P.callbackify(p, function(err, val) {
+            P.callback(p, function(err, val) {
                 qassert.equal(err, null);
                 qassert.equal(val, 123);
                 done();
@@ -1078,7 +1078,7 @@ describe ('q-then', function(){
 
         it ('should return value if already rejected', function(done) {
             var p = P.reject(321);
-            P.callbackify(p, function(err, val) {
+            P.callback(p, function(err, val) {
                 qassert.equal(err, 321);
                 done();
             })
@@ -1086,7 +1086,7 @@ describe ('q-then', function(){
 
         it ('should return value if it eventually resolves', function(done) {
             var p = _async(1234);
-            P.callbackify(p, function(err, val) {
+            P.callback(p, function(err, val) {
                 qassert.equal(err, null);
                 qassert.equal(val, 1234);
                 done();
@@ -1095,24 +1095,24 @@ describe ('q-then', function(){
 
         it ('should return reason if eventually rejected', function(done) {
             var p = _async(123, 'n');
-            P.callbackify(p, function(err, val) {
+            P.callback(p, function(err, val) {
                 qassert.equal(err, 123);
                 done();
             })
         })
 
-        it ('should callbackify a resolving thenable', function(done) {
+        it ('should callback a resolving thenable', function(done) {
             var p = { then: function(y,n){ setImmediate(y, 1234) } };
-            P.callbackify(p, function(err, val) {
+            P.callback(p, function(err, val) {
                 qassert.equal(err, null);
                 qassert.equal(val, 1234);
                 done();
             })
         })
 
-        it ('should callbackify a rejecting thenable', function(done) {
+        it ('should callback a rejecting thenable', function(done) {
             var p = { then: function(y,n){ setImmediate(n, 1234) } };
-            P.callbackify(p, function(err, val) {
+            P.callback(p, function(err, val) {
                 qassert.equal(err, 1234);
                 done();
             })
@@ -1121,11 +1121,15 @@ describe ('q-then', function(){
         it ('should return error if throws', function(done) {
             var error = new Error("deliberate error");
             var p = new P(function(y,n){ throw error });
-            P.callbackify(p, function(err, val) {
+            P.callback(p, function(err, val) {
                 qassert.equal(err, error);
                 done();
             })
         })
+    })
+
+    describe ('callbackify', function() {
+        // TODO: writeme
     })
 })
 
