@@ -13,9 +13,9 @@
   },
   "keywords": [ "fast", "promise", "Andras", "async" ],
   "scripts": {
+    "test": "qnit --version && qnit test/test-q* && node -p 'require(\"promises-aplus-tests\")' && node test/test-aplus*",
     "coverage": "nyc --version && nyc --reporter lcov --reporter text qnit test/test-q* || echo nyc not installed",
     "clean": "rm -rf .nyc_output coverage npm-debug.log",
-    "test": "qnit --version && qnit test/test-q* && node -p 'require(\"promises-aplus-tests\")' && node test/test-aplus* || echo qnit not installed, cannot test",
     "coveralls": "nyc --reporter text-lcov qnit test/test-q* | coveralls"
   }
 }
