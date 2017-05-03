@@ -5,6 +5,7 @@ node_js:
   - 7
 install:
   - npm install .
+  - npm install qassert
   - npm install -g qnit
   - npm install promises-aplus-tests
 after_success:
