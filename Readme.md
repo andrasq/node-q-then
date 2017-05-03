@@ -1,8 +1,8 @@
 q-then
 ======
 
-[![Build Status](https://api.travis-ci.org/andrasq/node-q-then.png?branch=master)](https://travis-ci.org/andrasq/node-q-then?branch=master)
-[![Coverage Status](https://coveralls.io/repos/github/andrasq/node-q-then/badge.png?branch=master)](https://coveralls.io/github/andrasq/node-q-then?branch=master)
+[![Build Status](https://api.travis-ci.org/andrasq/node-q-then.svg?branch=master)](https://travis-ci.org/andrasq/node-q-then?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/andrasq/node-q-then/badge.svg?branch=master)](https://coveralls.io/github/andrasq/node-q-then?branch=master)
 
 Fast bare-bones Promises/A+ compatible nodejs promises.
 
