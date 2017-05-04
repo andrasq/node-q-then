@@ -1,8 +1,8 @@
 q-then
 ======
 
-[<img src="https://api.travis-ci.org/andrasq/node-q-then.svg">](https://api.travis-ci.org/andrasq/node-q-then)
-[<img src="https://coveralls.io/repos/github/andrasq/node-q-then/badge.svg">](https://coveralls.io/github/andrasq/node-q-then)
+[![Build Status](https://api.travis-ci.org/andrasq/node-q-then.svg?branch=master)](https://travis-ci.org/andrasq/node-q-then?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/andrasq/node-q-then/badge.svg?branch=master)](https://coveralls.io/github/andrasq/node-q-then?branch=master)
 
 Fast bare-bones Promises/A+ compatible nodejs promises.
 
@@ -64,6 +64,9 @@ add callbacks to be notified when the promise is settled.
 A newly constructed promise is in the "pending" state; it can transition into
 "fulfilled" with a value or "rejected" with a reason.  Once no longer pending the
 state and value of the promise do not change.
+
+    var P = require('q-then').Promise;
+    var promise = P.resolve(1);    
 
 ## P.resolve( value )
 
