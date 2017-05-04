@@ -1,8 +1,8 @@
 q-then
 ======
 
-<a href="https://api.travis-ci.org/andrasq/node-q-then"><img src="https://api.travis-ci.org/andrasq/node-q-then.svg"></a>
-<a href="https://coveralls.io/github/andrasq/node-q-then"><img src="https://coveralls.io/repos/github/andrasq/node-q-then/badge.svg"></a>
+[<img src="https://api.travis-ci.org/andrasq/node-q-then.svg">](https://api.travis-ci.org/andrasq/node-q-then)
+[<img src="https://coveralls.io/repos/github/andrasq/node-q-then/badge.svg">](https://coveralls.io/github/andrasq/node-q-then)
 
 Fast bare-bones Promises/A+ compatible nodejs promises.
 
