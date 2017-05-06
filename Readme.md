@@ -113,13 +113,21 @@ is the promise system to use, eg the nodejs built-in `Promise` (the default is `
 Convert a promise into a callback invocation.  Unlike callbackify, callback invocation
 can be optimized for the type of the thenable.
 
-## P.callbackify( executor, cb(err, val) )
+## P.callbackify( func )
 
-Convert the promise building executor into a callbacked function.  Ie, if the executor
-resolves with a value the callback is called with the value, if it rejects with a
-reason the callback is called with the reason as the error, it it throws the callback
-is called with the error, and if it returns a promise the callback will be called once
-the returned promise settles.
+Convert the function `func` returning a promise into a function taking a callback.
+The returned function takes the same arguments as `func`, followed by a callback
+taking `err` and `val`.  If `func` fulfills with value `val`, the callback is invoked
+with `(null, val)`.  If `func` rejects with `reason`, the callback is invoked with
+`(reason)`.  If `func` throws, the error is not caught.
+
+    var laterP = function(a, b) {
+        return new Promise(function(rs, rj) { setTimeout(rs, 5, a + b); })
+    }
+    var laterCb = P.callbackify(laterP);
+    laterCb(1, 2, function(err, val) {
+        assert(val == 3);
+    })
 
 ## promise.then( [resolveHandler(value) [,rejectHandler(reason)]] )
 
