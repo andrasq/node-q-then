@@ -840,7 +840,7 @@ describe ('q-then', function(){
             var ds = [];
             for (var i=0; i<dataset.length; i++) ds[i] = (function(v){
                 return new P(function(resolve, reject) {
-                    setTimeout(resolve, 5, v);
+                    setTimeout(resolve, 15, v);
                 })
             })(dataset[i]);
             testDataset(ds, function(p, i) {
@@ -856,7 +856,7 @@ describe ('q-then', function(){
                         qassert.equal(p.state, _RESOLVED);
                         qassert.equal(p.value, ds[i].value);
                     }, done);
-                }, 10);
+                }, 20);
             });
         })
 
@@ -866,7 +866,7 @@ describe ('q-then', function(){
             // the dataset is promises that will eventually reject with a resolved promise
             for (var i=0; i<dataset.length; i++) {
                 ps[i] = P.resolve(dataset[i]);
-                ds[i] = (function(i){ return _async(ps[i], 'n', 5) })(i);
+                ds[i] = (function(i){ return _async(ps[i], 'n', 15) })(i);
             }
             // while the dataset is pending, promises resolved with them are also pending
             testDataset(ds, function(p, i) {
@@ -883,7 +883,7 @@ describe ('q-then', function(){
                         // p that was fulfilled with ds[i] will have taken on its state and value
                         qassert.isRejectedWith(ps[i], p);
                     }, done);
-                }, 10);
+                }, 20);
             });
         })
 
