@@ -215,8 +215,8 @@ describe ('q-then', function(){
 
     describe ('race', function(){
         it ('should resolve with the first value resolved', function(done) {
-            var p2 = new P(function(y,n){ setTimeout(y, 5, 2) });
-            var p3 = new P(function(y,n){ setTimeout(y, 7, 3) });
+            var p2 = new P(function(y,n){ setTimeout(y, 7, 2) });
+            var p3 = new P(function(y,n){ setTimeout(y, 11, 3) });
             var p1 = new P(function(y,n){ setTimeout(y, 3, 1) });
             var p = P.race([p1, p2, p3]);
             p.then(function(v) {
@@ -230,8 +230,8 @@ describe ('q-then', function(){
         })
 
         it ('should resolve with the first thenable resolved', function(done) {
-            var p1 = { then: function(y,n){ setTimeout(y, 5, 1) } };
-            var p2 = { then: function(y,n){ setTimeout(y, 7, 2) } };
+            var p1 = { then: function(y,n){ setTimeout(y, 7, 1) } };
+            var p2 = { then: function(y,n){ setTimeout(y, 11, 2) } };
             var p3 = new P(function(y,n){ setTimeout(y, 9, 3) });
             var p = P.race([p1, p2, p3]);
             p.then(function(v) {
@@ -242,7 +242,7 @@ describe ('q-then', function(){
         })
 
         it ('should reject if first promise to settle rejects', function(done) {
-            var p2 = new P(function(y,n){ setTimeout(y, 5, 2) });
+            var p2 = new P(function(y,n){ setTimeout(y, 7, 2) });
             var p3 = new P(function(y,n){ setTimeout(n, 3, 3) });
             var p = P.race([p2, p3]);
             p.then(function(v){ qassert.fail() }, function(e) {
@@ -278,8 +278,8 @@ describe ('q-then', function(){
 
         it ('should wait for all promises', function(done) {
             var p1 = new P(function(y,n){ setTimeout(y, 3, 1) });
-            var p2 = new P(function(y,n){ setTimeout(y, 5, 2) });
-            var p3 = new P(function(y,n){ setTimeout(y, 7, 3) });
+            var p2 = new P(function(y,n){ setTimeout(y, 7, 2) });
+            var p3 = new P(function(y,n){ setTimeout(y, 11, 3) });
             var p = P.all([p1, p2, p3]);
             p.then(function(v) {
                 qassert.deepEqual(v, [1, 2, 3]);
@@ -292,8 +292,8 @@ describe ('q-then', function(){
 
         it ('should reject if any promise rejects', function(done) {
             var p1 = new P(function(y,n){ setTimeout(y, 3, 1) });
-            var p2 = new P(function(y,n){ setTimeout(n, 5, 2) });
-            var p3 = new P(function(y,n){ setTimeout(y, 7, 3) });
+            var p2 = new P(function(y,n){ setTimeout(n, 7, 2) });
+            var p3 = new P(function(y,n){ setTimeout(y, 11, 3) });
             var p = P.all([p1, p2, p3]);
             p.then(null, function(v) {
                 qassert.equal(v, 2);
