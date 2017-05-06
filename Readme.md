@@ -116,10 +116,15 @@ can be optimized for the type of the thenable.
 ## P.callbackify( func )
 
 Convert the function `func` returning a promise into a function taking a callback.
-The returned function takes the same arguments as `func`, followed by a callback
-taking `err` and `val`.  If `func` fulfills with value `val`, the callback is invoked
-with `(null, val)`.  If `func` rejects with `reason`, the callback is invoked with
-`(reason)`.  If `func` throws, the error is not caught.
+This is simply `P.callback` applied to the promise returned by `func`.
+
+The returned function takes the same arguments as `func`, followed by a standard
+callback.  If the promise returned by `func` fulfills with value `val`, the
+callback is invoked with `(null, val)`.  If it rejects with `reason`, the callback
+is invoked with `(reason)`.  If `func` throws, the error is not caught.
+
+Note that a rejection reason can be any value, but well behaved applications should
+reject with an `Error`, or at a minimum a truthy value.
 
     var laterP = function(a, b) {
         return new Promise(function(rs, rj) { setTimeout(rs, 5, a + b); })
