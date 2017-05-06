@@ -1129,7 +1129,33 @@ describe ('q-then', function(){
     })
 
     describe ('callbackify', function() {
-        // TODO: writeme
+        var called;
+        var promiseYes = function(a) { return _async(a, 'y') }
+        var promiseNo = function(a) { return _async(a, 'n') }
+
+        it ('should return a function that invokes the callback on a fulfill', function(done) {
+            var fn = P.callbackify(promiseYes);
+            fn(_async(123, 'y', 5), function(e, v) {
+                qassert.equal(v, 123);
+                done();
+            })
+        })
+
+        it ('should invoke the callback on a delayed fulfill', function(done) {
+            var fn = P.callbackify(promiseYes);
+            fn(_async(_async(_async(123), 'y', 5), 'y', 5), function(e, v) {
+                qassert.equal(v, 123);
+                done();
+            })
+        })
+
+        it ('should invoke the callback on a reject', function(done) {
+            var fn = P.callbackify(promiseNo);
+            fn(123, function(e, v) {
+                qassert.equal(e, 123);
+                done();
+            })
+        })
     })
 })
 
