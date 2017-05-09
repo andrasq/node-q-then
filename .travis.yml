@@ -11,5 +11,5 @@ install:
   - npm install promises-aplus-tests
 after_success:
   - npm install -g nyc
-  - npm install -g coveralls
-  - npm run coveralls
+  - npm install -g codecov
+  - nyc --reporter lcov qnit test/test-q-then.js && codecov
