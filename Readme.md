@@ -174,6 +174,15 @@ Resources
 - [MDN Promise reference](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) - javascript Promise writeup
 - [Promises/A+](https://promisesaplus.com/) - javascript promises interoperability spec
 - [Promises/A+ tests](https://github.com/promises-aplus/promises-tests)
+- [E Promises](http://erights.org/talks/promises/paper/tgc05.pdf)
+- Barbara Liskov and Lubia Shrira. Promises: linguistic support for efficient
+  asynchronous procedure calls in distributed systems.  In 88: Proceedings of the ACM
+  SIGPLAN 1988 conference on Programming Language design and Implementation, pages
+  267, New York, NY, USA, 1988. ACM Press.260PLDI
+- Phillip Bogle and Barbara Liskov. Reducing cross domain call overhead using batched
+  futures. In 94: Proceedings of the ninth annual conference on Object-oriented
+  programming systems, language, and applications, pages 354, New York, NY, USA, 1994.
+  ACM Press.
 
 Related Work
 ============
