@@ -174,6 +174,7 @@ Resources
 - [MDN Promise reference](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) - javascript Promise writeup
 - [Promises/A+](https://promisesaplus.com/) - javascript promises interoperability spec
 - [Promises/A+ tests](https://github.com/promises-aplus/promises-tests)
+- [Quick Reference Guide](https://github.com/andrasq/node-docs/blob/master/promises-guide.md)
 - [E Promises](http://erights.org/talks/promises/paper/tgc05.pdf)
 - Barbara Liskov and Lubia Shrira. Promises: linguistic support for efficient
   asynchronous procedure calls in distributed systems.  In 88: Proceedings of the ACM
