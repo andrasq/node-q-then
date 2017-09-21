@@ -142,16 +142,18 @@ reason.  If the appropriate handler is not a function, the new promise takes on 
 value and state of `promise` when it eventually settles.
 
 If the promise is about to fulfill and a `resolveHandler` is given, it passes the
-fulfill value from `promise` to the handler and fulfills with the value returned by
-the handler instead.  If the handler throws, the promise rejects with the thrown error
-as the reason.  If `resolveHandler` is not a function, the promise fulfills with the
-original value.
+fulfill value to the handler and fulfills with the value returned by the handler
+instead.  If `resolveHandler` returns another promise, the `then` promise will follow
+the value of the other promise.  If the handler throws, the promise rejects with the
+thrown error as the reason.  If `resolveHandler` is not a function, the promise
+fulfills with the original value.
 
 If the promise is about to reject and a `rejectHandler` is given, it passes the reason
 `promise` rejected to the handler, and *fulfills* with the value returned by the
 handler.  Note that if `rejectHandler` returns, the new promise fulfills; to reject,
-the handler must throw.  If `resolveHandler` is not a function, the promise rejects
-with the original reason.
+the handler must throw.  If `rejectHandler` returns another promise, the `then` promise
+will follow the value of the other promise.  If `resolveHandler` is not a function,
+the promise rejects with the original reason.
 
     var p1 = Promise.resolve(1);
     var p2 = p1.then(function(v) { console.log("p1 fulfilled with", v); return 2 },
