@@ -195,5 +195,6 @@ Related Work
 - [`promise`](https://npmjs.com/package/promise) - promises package
 - [`rsvp`](https://npmjs.com/package/rsvp) - promises package
 - [`when`](https://npmjs.com/package/when) - promises package
+- [`pinkie`](https://npmjs.com/package/pinkie) - promises package
 - [`qinvoke`](https://npmjs.com/package/qinvoke) - fast call interception and re-invocation
 - [`qtimeit`](https://npmjs.com/package/qtimeit) - accurate nodejs call timings

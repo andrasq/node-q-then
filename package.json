@@ -1,6 +1,6 @@
 {
   "name": "q-then",
-  "version": "0.10.4",
+  "version": "0.10.5",
   "main": "index.js",
   "description": "very fast nodejs promises engine",
   "license": "Apache-2.0",
@@ -9,7 +9,7 @@
     "type": "git"
   },
   "engines": {
-    "node": "^0.10"
+    "node": ">= 0.10"
   },
   "keywords": [ "fast", "promise", "Andras", "async" ],
   "scripts": {

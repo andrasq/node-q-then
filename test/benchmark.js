@@ -22,6 +22,7 @@ var RSVP = require('rsvp').Promise
 var es6 = require('es6-promise').Promise;
 var when = require('when').Promise;
 var q = require('q').Promise;
+var pinkie = require('pinkie');
 
 var x;
 
@@ -137,6 +138,7 @@ qtimeit.bench.timeGoal = 5;
 qtimeit.bench.visualize = true;
 qtimeit.bench.baselineAvg = 50000;
 qtimeit.bench.forkTests = true;
+qtimeit.bench.showRunDetails = true;
 
 function waitForEnd( wantCount, cb ) {
     process.nextTick(function testEnd() {
@@ -208,12 +210,14 @@ testLoop = mikeTest;
 qtimeit.bench.preRunMessage =
     util.format("P: v" + Pversion) + "\n" +
     util.format("benchmark: nloops=%d, timeGoal=%d, forkTests=%s", nloops, qtimeit.bench.timeGoal, qtimeit.bench.forkTests) + "\n" +
-    "testFunc = " + testLoop.toString().replace(/^\s*\/\/.*\n/mg, '');
+//    "testFunc = " + testLoop.toString().replace(/^\s*\/\/.*\n/mg, '') +
+    "";
 //console.log("benchmarking: nloops=%d", nloops);
 //console.log("testFunc = %s", testLoop.toString().replace(/^\s*\/\/.*\n/mg, ''));
 qtimeit.bench({
 //    'Bluebird': function(cb) { testLoop(Bluebird, cb) },
     'node': function(cb) { typeof Promise != 'undefined' ? testLoop(Promise, cb) : cb() },
+    'pinkie': function(cb) { testLoop(pinkie, cb) },
     // 'q': function(cb) { testLoop(q, cb) },   // q is very slow, and completely tramples the other results
     'when': function(cb) { testLoop(when, cb) },
     'rsvp': function(cb) { testLoop(RSVP, cb) },
