@@ -174,7 +174,7 @@ to calling `promise.then(null, rejectHandler)`.
 ChangeLog
 =========
 
-- 0.10.5 - first released version
+- 1.0.0 - first released version (was 0.10.5)
 - 0.10.4 - final callbackify
 - 0.8.0 - initial callbackify
 - 0.7.2 - promisify
