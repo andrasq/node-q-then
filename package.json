@@ -1,8 +1,8 @@
 {
   "name": "q-then",
   "version": "0.10.5",
-  "main": "index.js",
-  "description": "very fast nodejs promises engine",
+  "main": "q-then.js",
+  "description": "very fast very small nodejs promises engine",
   "license": "Apache-2.0",
   "repository": {
     "url": "git://github.com/andrasq/node-q-then",
