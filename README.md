@@ -1,10 +1,9 @@
 q-then
 ======
-
 [![Build Status](https://api.travis-ci.org/andrasq/node-q-then.svg?branch=master)](https://travis-ci.org/andrasq/node-q-then?branch=master)
 [![Coverage Status](https://codecov.io/github/andrasq/node-q-then/coverage.svg?branch=master)](https://codecov.io/github/andrasq/node-q-then?branch=master)
 
-Fast bare-bones Promises/A+ compatible nodejs promises.
+Fast bare-bones very small Promises/A+ compatible nodejs promises library.
 
 Written as a an experiment to see how lean the implementation overhead could be
 made to be, with moderately good success; see the Benchmarks below.
@@ -13,6 +12,8 @@ Functionality is minimal; the goal was not to be a full package, but
 to implement a fast promises engine.
 
 As of version 0.5.2 all the Promises/A+ tests pass.
+
+To run the tests or benchmarks, check out the repo from https://github.com/andrasq/node-q-then.
 
 
 Benchmarks
@@ -170,13 +171,23 @@ fulfill with the value returned by the handler.  This function is exactly equiva
 to calling `promise.then(null, rejectHandler)`.
 
 
+ChangeLog
+=========
+
+- 0.10.5 - first released version
+- 0.10.4 - final callbackify
+- 0.8.0 - initial callbackify
+- 0.7.2 - promisify
+- 0.5.4 - full A+ promises compatibility
+
+
 Resources
 =========
 
+- my [Quick Reference Guide](https://github.com/andrasq/node-docs/blob/master/promises-guide.md)
 - [MDN Promise reference](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) - javascript Promise writeup
 - [Promises/A+](https://promisesaplus.com/) - javascript promises interoperability spec
 - [Promises/A+ tests](https://github.com/promises-aplus/promises-tests)
-- [Quick Reference Guide](https://github.com/andrasq/node-docs/blob/master/promises-guide.md)
 - [E Promises](http://erights.org/talks/promises/paper/tgc05.pdf)
 - Barbara Liskov and Lubia Shrira. Promises: linguistic support for efficient
   asynchronous procedure calls in distributed systems.  In 88: Proceedings of the ACM
