@@ -175,6 +175,7 @@ to calling `promise.then(null, rejectHandler)`.
 ChangeLog
 =========
 
+- 1.0.1 - fix resolve/reject to return a function, not the computed value
 - 1.0.0 - first released version (was 0.10.5)
 - 0.10.4 - final callbackify
 - 0.8.0 - initial callbackify

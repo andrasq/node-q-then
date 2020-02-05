@@ -40,13 +40,11 @@ P.prototype._resolvedBy = null; // thenable that first resolved the promise
 
 P.resolve = function resolve( v ) {
     var p = new P();
-    if (typeof v === 'function') v = __getFunctionValue(v, p);
     return __resolveYes(v, p, p);
 }
 
 P.reject = function reject( e ) {
     var p = new P();
-    if (typeof e === 'function') e = __getFunctionValue(e, p);
     return __resolveNo(e, p);
 }
 

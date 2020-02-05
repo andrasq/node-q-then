@@ -1,6 +1,6 @@
 {
   "name": "q-then",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "q-then.js",
   "description": "very fast very small nodejs promises engine",
   "license": "Apache-2.0",

@@ -141,35 +141,13 @@ describe ('q-then', function(){
             done();
         })
 
-        it ('should resolve with function return value', function(done) {
-            var p = P.resolve(function(){ return 123 });
-            qassert.equal(p.state, _RESOLVED);
-            qassert.equal(p.value, 123);
-            done();
-        })
-
-        it ('should reject if function throws', function(done) {
-            var err = new Error("die");
-            var p = P.resolve(function(){ throw err });
-            qassert.equal(p.state, _REJECTED);
-            qassert.equal(p.value, err);
-            done();
-        })
-
-        it ('should call __resolve on a value', function(done) {
-            var called;
-            P.onResolve(function(v, p, s){ called = [v, p, s] });
-            var p = P.resolve(1);
-            qassert.deepEqual(called, [1, p, _RESOLVED]);
-            done();
-        })
-
-        it ('should call __resolve on a function result', function(done) {
-            var called;
-            P.onResolve(function(v, p, s){ called = [v, p, s] });
-            var p = P.resolve(function(){ return 123 });
-            qassert.deepEqual(called, [123, p, _RESOLVED]);
-            done();
+        it ('should resolve a function as value', function(done) {
+            var fn = function(){};
+            P.resolve(fn).then(function(v) {
+                qassert.equal(v, fn);
+                done();
+            })
+            .catch(done);
         })
     })
 
@@ -182,34 +160,13 @@ describe ('q-then', function(){
             done();
         })
 
-        it ('should reject with function return value', function(done) {
-            var p = P.reject(function(){ return 123 });
-            qassert.equal(p.state, _REJECTED);
-            qassert.equal(p.value, 123);
-            done();
-        })
-
-        it ('should reject if function throws', function(done) {
-            var err = new Error("die2");
-            var p = P.reject(function(){ throw err });
-            qassert.equal(p.state, _REJECTED);
-            qassert.equal(p.value, err);
-            done();
-        })
-
-        it ('should call __resolve on a value', function(done) {
-            var called;
-            P.onResolve(function(v, p, s){ called = [v, p, s] });
-            var p = P.reject(123);
-            qassert.deepEqual(called, [123, p, _REJECTED]);
-            done();
-        })
-        it ('should call __resolve on a function result', function(done) {
-            var called;
-            P.onResolve(function(v, p, s){ called = [v, p, s] });
-            var p = P.reject(function(){ return 123 });
-            qassert.deepEqual(called, [123, p, _REJECTED]);
-            done();
+        it ('should reject a function as value', function(done) {
+            var fn = function(){};
+            P.reject(fn).catch(function(v) {
+                qassert.equal(v, fn);
+                done();
+            })
+            .catch(done);
         })
     })
 
