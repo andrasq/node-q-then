@@ -58,27 +58,34 @@ Api
 
 ## new P( executor(resolve, reject) )
 
-Create a promise and call the `executor` function.  The executor will use the
-provided `resolve` or `reject` functions to settle the created promise (either
-fulfill with a value or reject with a reason).  Use the `promise.then` method to
-add callbacks to be notified when the promise is settled.
+Create a promise and initialize it using the user-provided `executor` function.
+The executor is passed two functions to use to `resolve` or `reject` the new promise
+(fulfill with a value or reject with a reason, respectively).  Use the `promise.then` method
+to add callbacks to be notified when the promise is settled.
 
-A newly constructed promise is in the "pending" state; it can transition into
-"fulfilled" with a value or "rejected" with a reason.  Once no longer pending the
-state and value of the promise do not change.
+A newly constructed promise is in the "pending" state until it is settled: resolved with
+a value) or a rejected with failure reason.  If resolved with a Promise or a thenable
+the new promise remains pending and will eventually take on the final value and state of the
+thenable.  If the executor calls reject() or throws an exception, the new promise will
+settle into the rejecting state with the reason or throw error.  Once settled (no longer
+pending), the value and state of a Promise do not change.
 
     var P = require('q-then').Promise;
-    var promise = P.resolve(1);    
+    var promise = new P(function(resolve, reject) {
+        resolve(123);
+    })
+    promise.then(function(v) {
+        // v => 123
+    })
 
 ## P.resolve( value )
 
-Create a new promise that will resolve with the value.  Value can be a function, a
-promise (any _thenable_), or some other value.  Functions are resolved with their return value.
-Terminal values resolve immediate.  For thenables the promise will take on the value and status
-of the thenable when it resolves, either fulfilled with a value or rejected with a reason.
+Create a new promise that will resolve with the value.  Value can be any javascript value
+or a Promise or thenable.  If a js value, the new promise is resolved with that value.
+If a Promise or thenable, the promise will eventually resolve or reject, same as the thenable.
 
     var promise = P.resolve(123);
-    promise.then(function resolve(value) {
+    promise.then(function(value) {
         // value => 123
     })
 
