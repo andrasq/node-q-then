@@ -95,10 +95,12 @@ P.callbackify = function callbackify( fn ) {
 
 // safe call the function to use its return value to fulfill promise p1.
 // If the function throws, reject the promise with the error.
+/**
 function __getFunctionValue( fn, p1 ) {
     try { return fn() }
     catch (e) { __settle(e, p1, _REJECTED) }
 }
+**/
 
 // wait for the first promise to resolve, and take on its value.
 P.race = function race( promises ) {
