@@ -5,7 +5,8 @@ node_js:
   - 6
   - 8
   - 10
-  - 11
+  - 12
+  - 13
 install:
   - npm install .
   - npm install qassert
@@ -13,6 +14,6 @@ install:
   - npm install promises-aplus-tests
 after_success:
   - if [ `node -p 'process.version.slice(0, 3)'` != "v8." ]; then exit; fi
-  - npm install -g nyc codecov coveralls
-  - npm run coverage && codecov
+  - npm install -g nyc coveralls
+  - npm run coverage
   - nyc report -r text-lcov | coveralls
