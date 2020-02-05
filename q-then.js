@@ -10,9 +10,8 @@
 'use strict';
 
 
-module.exports = {
-    Promise: P,
-};
+module.exports = P;
+P.Promise = P;
 
 var _PENDING = 0;               // falsy means no final value yet
 var _RESOLVING = false;         // false = pending but committed
