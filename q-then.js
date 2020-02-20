@@ -27,6 +27,11 @@ function P( executor ) {
     this.state = _PENDING;
     this.value = undefined;
 
+    this._listeners = null;
+    this._yes = null;
+    this._no = null;
+    this._resolvedBy = null;
+
     if (executor) _tryExecutor(this, executor);
 }
 
@@ -75,7 +80,7 @@ P.callback = function callback( p1, cb ) {
     else {
         p1.then(
             function(v) { cb(null, v) },
-            function(e) { cb(e) }
+            function(e) { cb(e || new Error('falsy error')) }
         );
     }
 }
@@ -343,7 +348,10 @@ function __setState( v, p, state ) {
     }
 }
 function __settle( v, p, state ) {
-    if (p.state) return;
+    if (p.state) {
+        // if (state === _REJECTED) console.warn("P: uncaught rejection", v);
+        return;
+    }
     __setState(v, p, state);
 }
 
