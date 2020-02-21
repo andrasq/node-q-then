@@ -361,6 +361,8 @@ function __settle( v, p, state ) {
  * if p1._listeners is not an array, the list is omitted, just the item is stored.
  * invariant: p1._listeners is null, a thenable, or an Array; _yes and _no match it.
  * The alternate of a single queue of listener objects { p2, resolve, reject } is 12% slower.
+ * (todo: our unit tests break if notifications are not made in order)
+ * (note: 165-65-16 d1-d2-d3)
  */
 function _addThenListener( p1, p2, resolve, reject ) {
     if (!p1._listeners) {
@@ -391,6 +393,7 @@ function _notifyThenListeners( v, p1, state ) {
     var handlers = (state === _RESOLVED) ? onYes : onNo;
     p1._listeners = p1._yes = p1._no = null;
 
+    if (!listeners) return;
     if (listeners.constructor !== Array) {
         if (typeof listeners === 'function') listeners(v, p1, state, onYes, onNo); else
         _handleThen(handlers, v, listeners, state, p1);

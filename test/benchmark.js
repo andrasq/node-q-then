@@ -215,6 +215,7 @@ qtimeit.bench.preRunMessage =
 //console.log("benchmarking: nloops=%d", nloops);
 //console.log("testFunc = %s", testLoop.toString().replace(/^\s*\/\/.*\n/mg, ''));
 qtimeit.bench({
+    'q-then-1': function(cb) { testLoop(P, cb) },
 //    'Bluebird': function(cb) { testLoop(Bluebird, cb) },
     'node': function(cb) { typeof Promise != 'undefined' ? testLoop(Promise, cb) : cb() },
     'pinkie': function(cb) { testLoop(pinkie, cb) },
