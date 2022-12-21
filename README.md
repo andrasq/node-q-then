@@ -110,6 +110,17 @@ and resolves with the array of their values in the same order as the promises.  
 any of the promises in the array reject, the returned promise will reject with the
 same reason without waiting for the other promises to settle.
 
+## P.allSettled( array )
+
+Create a new promise that waits for all promises in the array to fulfill or reject, and
+resolves to an array of objects with fields `status`and either `value` or `reason`:
+if status is `'fulfilled'` then the value, else if `'rejected'` then the reason.
+Non-thenables resolve to themselves.  This function never rejects.
+
+    var p = P.allSettled([P.resolve(1), P.reject(2)]);
+    await p;
+    // => [ {status: 'fulfilled', value: 1}, {status: rejected', value: 2} ]
+
 ## P.promisify( func [,PP] )
 
 Convert the callbacked function `func` into a function that does not take callback
@@ -181,6 +192,7 @@ to calling `promise.then(null, rejectHandler)`.
 ChangeLog
 =========
 
+- 1.1.0 - new `P.allSettled`, rewrite and fix `all` to resolve non-thenables
 - 1.0.1 - fix resolve/reject to return a function, not the computed value
 - 1.0.0 - first released version (was 0.10.5)
 - 0.10.4 - final callbackify

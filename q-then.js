@@ -1,7 +1,7 @@
 /**
  * q-then -- very fast promises engine
  *
- * Copyright (C) 2017 Andras Radics
+ * Copyright (C) 2017,2022 Andras Radics
  * Licensed under the Apache License, Version 2.0
  *
  * 2017-04-06 - AR.
@@ -128,70 +128,40 @@ P.race = function race( promises ) {
 }
 
 /*
- * wait for all promises to resolve, and fulfill with the array of their values.
- * If any reject, reject with that reason.  If promises is empty array, fufill with [].
+ * await all promises to resolve, and fulfill with the array of their values.
+ * If any reject, reject immediately with that reason.  If promises is empty array, fufill with [].
+ * Non-thenables resolve to themselves.
  */
-var _dummyP2 = new P();
 P.all = function all( promises ) {
-    var p2 = new P();
-
-    if (!promises.length) { __settle([], p2, _RESOLVED); return p2 }
-
-    var nexpect = promises.length;
-    var results = new Array(promises.length);
-    var nresults = 0;
-
-    function recordValue( v, p1, state, i ) {
-        results[i] = v;
-        nresults += 1;
-        if (state != _RESOLVED) __resolveNo(v, p2, p2);
-        else if (nresults === nexpect) __resolveYes(results, p2, p2);
-    }
-
-    var info = null;
-/**
-    var info = {
-        p2: p2,
-        nexpect: promises.length,
-        results: results,
-        nresults: 0,
-    };
-    recordValue = __recordAllValue;
-/**/
-
-    for (var i=0; i<promises.length; i++) {
-        if (promises[i] instanceof P) {
-            if (!promises[i].state) _addThenListener(promises[i], recordValue, i, info);
-            else if (promises[i].state === _RESOLVED) {
-                results[i] = promises[i].value;
-                nresults += 1;
-            }
-            else { __resolveNo(promises[i].value, p2, p2); break; }
-        }
-        else {
-            var then = _getThenMethod(promises[i], p2);
-            if (then) {
-                var recordCb = (function(i, p1){
-                    return function(v, s) { recordValue(v, p1, s, i, info); }
-                })(i, promises[i]);
-                __resolveGenericThenable(promises[i], _dummyP2, then, recordCb);
-            }
-            else { __resolveNo(new Error("not a thenable"), p2, p2); break; }
-        }
-    }
-
-    return p2;
+    if (!(promises.length > 0)) return P.resolve([]);
+    return new P(function(resolve, reject) {
+        var results = new Array(promises.length);
+        var expectCount = promises.length;
+        promises.map(function(p, i) {
+            P.resolve(p).then(function(v) { results[i] = v, oneDone() }, reject);
+        })
+        function oneDone() { --expectCount === 0 && resolve(results) }
+    })
 }
-/**
-function __recordAllValue( v, p1, state, i, info ) {
-    var p2 = info.p2;
-    info.results[i] = v;
-    info.nresults += 1;
-    if (state !== _RESOLVED) __resolveNo(v, p2, p2);
-    else if (info.nresults === info.nexpect) __resolveYes(info.results, p2, p2);
-}
-**/
 
+/*
+ * Await all promises and fulfill with their individual completion statuses
+ * Todo: Promise.allSettled (new in node-v12) accepts any iterable
+ */
+P.allSettled = function allSettled( promises ) {
+    if (!(promises.length > 0)) return P.resolve([]);
+    return new P(function(resolve) {
+        var expectCount = promises.length;
+        var results = new Array(promises.length);
+        promises.forEach(function(p, i) {
+            P.resolve(p).then(
+                function(v) { results[i] = { status: 'fulfilled', value: v }, oneDone() },
+                function(e) { results[i] = { status: 'rejected', reason: e }, oneDone() }
+            )
+        })
+        function oneDone() { --expectCount === 0 && resolve(results) }
+    })
+}
 
 // Run the executor to resolve the promise when the executor callback is called.
 // If the executor resolves with a promise, p1 takes on the value of the promise.

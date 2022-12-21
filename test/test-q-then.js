@@ -261,12 +261,6 @@ describe ('q-then', function(){
             })
         })
 
-        it ('should reject if one of the promises is not a thenable', function(done) {
-            var p = P.all([P.resolve(1), 2]);
-            qassert.equal(p.state, _REJECTED);
-            done();
-        })
-
         it ('should reject if one of the promises throws', function(done) {
             var p1 = P.resolve(1);
             var p2 = new P(function(y,n){ throw 2 });
@@ -325,6 +319,58 @@ describe ('q-then', function(){
                     done();
                 }
             );
+        })
+    })
+
+    describe('allSettled', function() {
+        it ('returns a promise', function(done) {
+            var p = P.allSettled([]);
+            qassert.ok(p instanceof P);
+            done();
+        })
+
+        it ('awaits all promises', function(done) {
+            function pause(ms) { return new P(function(done) { setTimeout(function() { done(ms) }, ms) }) }
+            var p = P.allSettled([pause(1), pause(2)]);
+            p.then(
+                function(res) {
+                    qassert.deepEqual(res, [ {status: 'fulfilled', value: 1}, {status: 'fulfilled', value: 2} ]);
+                    done();
+                },
+                qassert.fail
+            )
+        })
+
+        it ('returns fulfilled and rejected both', function(done) {
+            var p = P.allSettled([P.resolve(1), P.reject(2)]);
+            p.then(
+                function(res) {
+                    qassert.deepEqual(res, [{status: 'fulfilled', value: 1}, {status: 'rejected', reason: 2}]);
+                    done()
+                },
+                qassert.fail
+            )
+        })
+
+        it ('returns non-thenables as themselves', function(done) {
+            var p = P.allSettled([0, 1, P.resolve(2), false]);
+            p.then(
+                function(res) {
+                    // NOTE: assertion failures from here are too deep to propagate back to the test runner
+                    qassert.ok(res.every(function(r) { return r.status === 'fulfilled' }));
+                    qassert.deepStrictEqual(res.map(function(r) { return r.value }), [0, 1, 2, false]);
+                    done();
+                },
+                qassert.fail
+            )
+        })
+
+        it ('handles a single non-thenable', function(done) {
+            var p = P.allSettled([null]);
+            p.then(function(res) {
+                qassert.deepStrictEqual(res, [{ status: 'fulfilled', value: null }]);
+                done();
+            }, qassert.fail)
         })
     })
 
