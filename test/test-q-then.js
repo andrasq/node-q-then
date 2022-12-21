@@ -171,6 +171,19 @@ describe ('q-then', function(){
     })
 
     describe ('race', function(){
+        it ('never resolves if the list is empty', function(done) {
+            // FIXME:
+            var resolved = false;
+            var p = P.race([]);
+            p.then(function(v) {
+                resolved = true;
+            })
+            setTimeout(function() {
+                qassert.notEqual(resolved, true);
+                done();
+            }, 2);
+        })
+
         it ('should resolve with the first value resolved', function(done) {
             var p2 = new P(function(y,n){ setTimeout(y, 7, 2) });
             var p3 = new P(function(y,n){ setTimeout(y, 11, 3) });
@@ -219,10 +232,13 @@ describe ('q-then', function(){
             );
         })
 
-        it ('should reject if one of the promises is not a thenable', function(done) {
+        it ('should resolve non-thenables to themselevs', function(done) {
             var p = P.race([P.resolve(1), 2]);
-            qassert.equal(p.state, _REJECTED);
-            done();
+            p.then(function(v) {
+                // race2 returns 1 because it wraps each argument in a promise
+                qassert.equal(v, 2);
+                done();
+            }, qassert.fail)
         })
     })
 

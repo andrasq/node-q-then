@@ -108,9 +108,9 @@ function __getFunctionValue( fn, p1 ) {
 **/
 
 // wait for the first promise to resolve, and take on its value.
+// NOTE: nodejs Promise never resolves if the list is empty
 P.race = function race( promises ) {
     var p2 = new P();
-
     for (var i=0; i<promises.length; i++) {
         var p1 = promises[i];
         if (p1 && p1.constructor === P) {
@@ -120,12 +120,18 @@ P.race = function race( promises ) {
             var then = _getThenMethod(p1, p2);
             if (then) __resolveGenericThenable(p1, p2, then);
             else if (p2.state) return p2;
-            else return __resolveNo(new Error("not a thenable"), p2);
+            else __resolveYes(p1, p2, p2); // resolve with value p1 promise p2 as provided by p2
         }
     }
-
     return p2;
 }
+/**
+P.race2 = function race( promises ) {
+    return new P(function(resolve, reject) {
+        for (var i=0; i<promises.length; i++) P.resolve(promises[i]).then(resolve, reject);
+    })
+}
+/**/
 
 /*
  * await all promises to resolve, and fulfill with the array of their values.
