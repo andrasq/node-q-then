@@ -192,8 +192,8 @@ to calling `promise.then(null, rejectHandler)`.
 ChangeLog
 =========
 
-- 1.1.0 - new `P.allSettled`, rewrite and fix `all` to resolve non-thenables, fix `race`
-          to resolve non-thenables
+- 1.1.0 - new `P.allSettled`, rewrite and fix `all` to resolve non-thenables, rewrite and
+          fix `race` to handle non-thenables and older node, let work with node-v0.6
 - 1.0.1 - fix resolve/reject to return a function, not the computed value
 - 1.0.0 - first released version (was 0.10.5)
 - 0.10.4 - final callbackify

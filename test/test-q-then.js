@@ -15,6 +15,8 @@ var _RESOLVING = P._RESOLVING;
 var _RESOLVED = P._RESOLVED;
 var _REJECTED = P._REJECTED;
 
+var setImmediate = global.setImmediate || function(fn, a, b) { process.nextTick(function() { fn(a, b) }) };
+
 qassert.isPending = function(p) {
     //p.then(function(v) { qassert.ok(1) }, function(e) { qassert.fail() });
     qassert.equal(p.state, _PENDING);
@@ -235,8 +237,9 @@ describe ('q-then', function(){
         it ('should resolve non-thenables to themselevs', function(done) {
             var p = P.race([P.resolve(1), 2]);
             p.then(function(v) {
+                // race returns 2 because it optimizes non-promises,
                 // race2 returns 1 because it wraps each argument in a promise
-                qassert.equal(v, 2);
+                qassert.equal(v, 1);
                 done();
             }, qassert.fail)
         })
